@@ -1,205 +1,93 @@
-import React from "react";
+import React, { useState } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Text } from "@react-three/drei";
 import { TextureLoader } from "three";
 
 const catalog = {
   crestTeeOxford: {
     name: "Crest T-Shirt Oxford",
-    category: "tshirt",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Crest-T-Shirt-Quality-199894672.jpg?v=1754063343&width=1220",
   },
   crestTeeNavy: {
     name: "Crest T-Shirt Navy",
-    category: "tshirt",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Crest-T-Shirt-Quality-199895040.jpg?v=1754063343&width=1220",
   },
   crestTeeWhite: {
     name: "Crest T-Shirt White",
-    category: "tshirt",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/HarvardCrestT-Shirt_White.jpg?v=1754063343&width=1220",
   },
   harvardArcTeeCrimson: {
     name: "Harvard Arc T-Shirt Crimson",
-    category: "tshirt",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199895987.jpg?v=1750257252&width=1220",
   },
   harvardArcTeeOxford: {
     name: "Harvard Arc T-Shirt Oxford",
-    category: "tshirt",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199896729.jpg?v=1750257252&width=1220",
   },
   harvardArcTeeBlack: {
     name: "Harvard Arc T-Shirt Black",
-    category: "tshirt",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199896311.jpg?v=1750257252&width=1220",
   },
   harvardArcTeeWhite: {
     name: "Harvard Arc T-Shirt White",
-    category: "tshirt",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/HarvardArcT-Shirt_White.jpg?v=1754063103&width=1220",
   },
-
   crestHoodCrimson: {
     name: "Crest Hood Crimson",
-    category: "hoodie",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Hooded-Crest-Sweatshirt-Quality-199988176.jpg?v=1720623769&width=1220",
   },
   crestHoodNavy: {
     name: "Crest Hood Navy",
-    category: "hoodie",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Hooded-Crest-Sweatshirt-Quality-199987681.jpg?v=1720623777&width=1220",
   },
   crestHoodOxford: {
     name: "Crest Hood Oxford",
-    category: "hoodie",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Hooded-Crest-Sweatshirt-Quality-199988554.jpg?v=1720623764&width=1220",
   },
   proWeaveHoodCrimson: {
     name: "Pro-Weave Hood Crimson",
-    category: "hoodie",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Pro-Weave-Hood-Quality-199932325.jpg?v=1720622066&width=1220",
   },
   proWeaveHoodOatmeal: {
     name: "Pro-Weave Hood Oatmeal",
-    category: "hoodie",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Pro-Weave-Hood-Quality-199931913.jpg?v=1720622085&width=1220",
   },
-  hoodedArcCrimson: {
-    name: "Harvard Hooded Arc Sweatshirt Crimson",
-    category: "hoodie",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Hooded-Arc-Sweatshirt-Quality-199898177.jpg?v=1720621069&width=1220",
-  },
-  hoodedArcOxford: {
-    name: "Harvard Hooded Arc Sweatshirt Oxford",
-    category: "hoodie",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Hooded-Arc-Sweatshirt-Quality-199897646.jpg?v=1720621060&width=1220",
-  },
-
   benchmarkCrewNavy: {
     name: "Benchmark Crew Navy",
-    category: "crewneck",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Benchmark-Crew-Ouray-200008257.jpg?v=1720624426&width=1220",
   },
   benchmarkCrewRed: {
     name: "Benchmark Crew Red",
-    category: "crewneck",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Benchmark-Crew-Ouray-200008852.jpg?v=1720624387&width=1220",
   },
   benchmarkCrewOxford: {
     name: "Benchmark Crew Oxford",
-    category: "crewneck",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Benchmark-Crew-Ouray-200009444.jpg?v=1720624384&width=1220",
   },
   proWeaveCrewBlack: {
     name: "Pro-Weave Crew Black",
-    category: "crewneck",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Pro-Weave-Crewneck-Quality-199940174.jpg?v=1750257160&width=1220",
   },
   proWeaveCrewOxford: {
     name: "Pro-Weave Crew Oxford",
-    category: "crewneck",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Pro-WeaveCrewneck_Oatmeal.jpg?v=1754063820&width=1220",
-  },
-  crestCrewCrimson: {
-    name: "Harvard Crest Crewneck Crimson",
-    category: "crewneck",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Crest-Crewneck-Quality-199994052.jpg?v=1720623986&width=1220",
-  },
-  crestCrewOxford: {
-    name: "Harvard Crest Crewneck Oxford",
-    category: "crewneck",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Crest-Crewneck-Quality-199994428.jpg?v=1720623958&width=1220",
-  },
-  arcCrewCrimson: {
-    name: "Harvard Arc Crewneck Crimson",
-    category: "crewneck",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-Crewneck-Quality-199995115.jpg?v=1720624015&width=1220",
-  },
-  arcCrewOxford: {
-    name: "Harvard Arc Crewneck Oxford",
-    category: "crewneck",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-Crewneck-Quality-199995558.jpg?v=1720623994&width=1220",
-  },
-
-  hSweaterCrimson: {
-    name: "The H Sweater Crimson",
-    category: "sweater",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/The-H-Sweater-Varsity-200070268.jpg?v=1720626274&width=1220",
-  },
-  hSweaterCream: {
-    name: "The H Sweater Cream",
-    category: "sweater",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/The-H-Sweater-Varsity-200070712.jpg?v=1720626276&width=1220",
-  },
-
-  plaidPajamaCrimson: {
-    name: "Plaid Pajama Pants Crimson",
-    category: "bottoms",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Plaid-Pajama-Pants-Concepts-Sport-200004480.jpg?v=1720624256&width=1220",
-  },
-  plaidPajamaGrey: {
-    name: "Plaid Pajama Pants Grey",
-    category: "bottoms",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Plaid-Pajama-Pants-Concepts-Sport-200004955.jpg?v=1720624264&width=1220",
-  },
-  garityShortsCrimson: {
-    name: "Garity Shorts Crimson",
-    category: "bottoms",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/The-Garity-Shorts-Atla-Global-200061861.png?v=1720626005&width=1220",
-  },
-  garityShortsBlack: {
-    name: "Garity Shorts Black",
-    category: "bottoms",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/The-Garity-Shorts-Atla-Global-200062351.png?v=1720626002&width=1220",
-  },
-  championSweatpantsGrey: {
-    name: "Champion Cuffed Sweatpants Grey",
-    category: "bottoms",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/HarvardChampionCuffedSweatpants.jpg?v=1754063127&width=1220",
-  },
-
-  nikePoloBlack: {
-    name: "Harvard Nike Varsity Polo Black",
-    category: "polo",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Nike-Varsity-Polo-Branded-Custom-Sportswear-200066247.jpg?v=1750102299&width=1220",
-  },
-  nikePoloCrimson: {
-    name: "Harvard Nike Varsity Polo Crimson",
-    category: "polo",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/HarvardNikeVarsityPolo_Crimson.jpg?v=1754063523&width=1220",
   },
 };
 
@@ -214,6 +102,19 @@ function ProductCard({ productId, x = 0, y = 1.2, z = 0, scale = 1 }) {
         <meshStandardMaterial map={texture} />
       </mesh>
     </group>
+  );
+}
+
+function FixtureLabel({ id, selected }) {
+  return (
+    <Text
+      position={[0, 2.35, 0]}
+      fontSize={0.28}
+      color={selected ? "blue" : "black"}
+      anchorX="center"
+    >
+      {id}
+    </Text>
   );
 }
 
@@ -233,11 +134,21 @@ function WallSegment({ start, end, height = 3.5 }) {
   );
 }
 
-function FourWayRack({ x, z, rotation = 0, products = [] }) {
+function FourWayRack({ fixture, selectedId, setSelectedId }) {
+  const selected = selectedId === fixture.id;
   const arms = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2];
 
   return (
-    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+    <group
+      position={[fixture.x, 0, fixture.z]}
+      rotation={[0, fixture.rotation, 0]}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedId(fixture.id);
+      }}
+    >
+      <FixtureLabel id={fixture.id} selected={selected} />
+
       <mesh position={[0, 1, 0]}>
         <cylinderGeometry args={[0.05, 0.05, 2]} />
         <meshStandardMaterial color="#777" />
@@ -251,7 +162,7 @@ function FourWayRack({ x, z, rotation = 0, products = [] }) {
           </mesh>
 
           <ProductCard
-            productId={products[i % products.length]}
+            productId={fixture.products[i % fixture.products.length]}
             x={0.55}
             y={1.15}
             z={0}
@@ -261,8 +172,89 @@ function FourWayRack({ x, z, rotation = 0, products = [] }) {
 
       <mesh position={[0, 0.05, 0]}>
         <cylinderGeometry args={[0.45, 0.45, 0.1, 32]} />
+        <meshStandardMaterial color={selected ? "#60a5fa" : "#cfcfcf"} />
+      </mesh>
+    </group>
+  );
+}
+
+function DisplayTable({ fixture, selectedId, setSelectedId }) {
+  const selected = selectedId === fixture.id;
+
+  return (
+    <group
+      position={[fixture.x, 0, fixture.z]}
+      rotation={[0, fixture.rotation, 0]}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedId(fixture.id);
+      }}
+    >
+      <FixtureLabel id={fixture.id} selected={selected} />
+
+      <mesh position={[0, 0.45, 0]}>
+        <boxGeometry args={[2.4, 0.2, 1.15]} />
+        <meshStandardMaterial color={selected ? "#60a5fa" : "#8b5a2b"} />
+      </mesh>
+
+      {fixture.products.slice(0, 4).map((p, i) => (
+        <ProductCard
+          key={i}
+          productId={p}
+          x={-0.75 + i * 0.5}
+          y={0.83}
+          z={0}
+          scale={0.65}
+        />
+      ))}
+    </group>
+  );
+}
+
+function HorizontalRack({ fixture, selectedId, setSelectedId }) {
+  const selected = selectedId === fixture.id;
+
+  return (
+    <group
+      position={[fixture.x, 0, fixture.z]}
+      rotation={[0, fixture.rotation, 0]}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedId(fixture.id);
+      }}
+    >
+      <FixtureLabel id={fixture.id} selected={selected} />
+
+      <mesh position={[0, 1.4, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.04, 0.04, 2.5]} />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#777"} />
+      </mesh>
+
+      <mesh position={[-1.15, 0.75, 0]}>
+        <cylinderGeometry args={[0.04, 0.04, 1.4]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
+      <mesh position={[1.15, 0.75, 0]}>
+        <cylinderGeometry args={[0.04, 0.04, 1.4]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
+      <mesh position={[0, 0.05, 0]}>
+        <boxGeometry args={[2.8, 0.1, 0.5]} />
         <meshStandardMaterial color="#cfcfcf" />
       </mesh>
+
+      {fixture.products.slice(0, 5).map((p, i) => (
+        <ProductCard
+          key={i}
+          productId={p}
+          x={-0.8 + i * 0.4}
+          y={1.15}
+          z={0}
+          scale={0.65}
+        />
+      ))}
     </group>
   );
 }
@@ -286,207 +278,262 @@ function WallHookRack({ x, z, rotation = 0, product }) {
   );
 }
 
-function DisplayTable({ x, z, rotation = 0, products = [] }) {
-  return (
-    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
-      <mesh position={[0, 0.45, 0]}>
-        <boxGeometry args={[2.4, 0.2, 1.15]} />
-        <meshStandardMaterial color="#8b5a2b" />
-      </mesh>
-
-      {products.slice(0, 4).map((p, i) => (
-        <ProductCard
-          key={i}
-          productId={p}
-          x={-0.75 + i * 0.5}
-          y={0.83}
-          z={0}
-          scale={0.65}
-        />
-      ))}
-    </group>
-  );
-}
-
-function HorizontalRack({ x, z, rotation = 0, products = [] }) {
-  return (
-    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
-      <mesh position={[0, 1.4, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.04, 0.04, 2.5]} />
-        <meshStandardMaterial color="#777" />
-      </mesh>
-
-      <mesh position={[-1.15, 0.75, 0]}>
-        <cylinderGeometry args={[0.04, 0.04, 1.4]} />
-        <meshStandardMaterial color="#777" />
-      </mesh>
-
-      <mesh position={[1.15, 0.75, 0]}>
-        <cylinderGeometry args={[0.04, 0.04, 1.4]} />
-        <meshStandardMaterial color="#777" />
-      </mesh>
-
-      <mesh position={[0, 0.05, 0]}>
-        <boxGeometry args={[2.8, 0.1, 0.5]} />
-        <meshStandardMaterial color="#cfcfcf" />
-      </mesh>
-
-      {products.slice(0, 5).map((p, i) => (
-        <ProductCard
-          key={i}
-          productId={p}
-          x={-0.8 + i * 0.4}
-          y={1.15}
-          z={0}
-          scale={0.65}
-        />
-      ))}
-    </group>
-  );
-}
+const startingFixtures = [
+  {
+    id: "Rack 1",
+    type: "fourWay",
+    x: -5.7,
+    z: -2.7,
+    rotation: 0.8,
+    products: [
+      "harvardArcTeeCrimson",
+      "harvardArcTeeOxford",
+      "harvardArcTeeBlack",
+      "harvardArcTeeWhite",
+    ],
+  },
+  {
+    id: "Rack 2",
+    type: "fourWay",
+    x: 1.1,
+    z: -3.2,
+    rotation: 0.8,
+    products: [
+      "crestHoodCrimson",
+      "crestHoodNavy",
+      "crestHoodOxford",
+      "proWeaveHoodOatmeal",
+    ],
+  },
+  {
+    id: "Rack 3",
+    type: "fourWay",
+    x: 2.4,
+    z: -1.0,
+    rotation: 0.8,
+    products: [
+      "benchmarkCrewNavy",
+      "benchmarkCrewRed",
+      "benchmarkCrewOxford",
+      "proWeaveCrewBlack",
+    ],
+  },
+  {
+    id: "Rack 4",
+    type: "fourWay",
+    x: 4.9,
+    z: 0.2,
+    rotation: 0.8,
+    products: [
+      "crestTeeOxford",
+      "crestTeeNavy",
+      "crestTeeWhite",
+      "harvardArcTeeCrimson",
+    ],
+  },
+  {
+    id: "Rack 5",
+    type: "fourWay",
+    x: -6.1,
+    z: 4.0,
+    rotation: 0.8,
+    products: [
+      "benchmarkCrewNavy",
+      "benchmarkCrewRed",
+      "benchmarkCrewOxford",
+      "proWeaveCrewOxford",
+    ],
+  },
+  {
+    id: "Rack 6",
+    type: "fourWay",
+    x: 0.6,
+    z: 4.3,
+    rotation: 0.8,
+    products: [
+      "harvardArcTeeCrimson",
+      "crestTeeOxford",
+      "crestTeeNavy",
+      "crestTeeWhite",
+    ],
+  },
+  {
+    id: "Rack 7",
+    type: "fourWay",
+    x: 3.8,
+    z: 3.7,
+    rotation: 0.8,
+    products: [
+      "crestHoodCrimson",
+      "crestHoodNavy",
+      "proWeaveHoodCrimson",
+      "proWeaveHoodOatmeal",
+    ],
+  },
+  {
+    id: "Horizontal Rack 1",
+    type: "horizontal",
+    x: 0.7,
+    z: -4.0,
+    rotation: 0.45,
+    products: [
+      "crestHoodCrimson",
+      "crestHoodNavy",
+      "crestHoodOxford",
+      "proWeaveHoodCrimson",
+    ],
+  },
+  {
+    id: "Table 1",
+    type: "table",
+    x: -6.1,
+    z: 0.5,
+    rotation: 0,
+    products: [
+      "harvardArcTeeCrimson",
+      "harvardArcTeeOxford",
+      "harvardArcTeeBlack",
+      "harvardArcTeeWhite",
+    ],
+  },
+  {
+    id: "Table 2",
+    type: "table",
+    x: -1.2,
+    z: 1.2,
+    rotation: 0.45,
+    products: [
+      "benchmarkCrewNavy",
+      "benchmarkCrewRed",
+      "benchmarkCrewOxford",
+      "proWeaveCrewOxford",
+    ],
+  },
+];
 
 export default function App() {
-  const fixtures = [
-    {
-      type: "fourWay",
-      x: -5.7,
-      z: -2.7,
-      rotation: 0.8,
-      products: [
-        "harvardArcTeeCrimson",
-        "harvardArcTeeOxford",
-        "harvardArcTeeBlack",
-        "harvardArcTeeWhite",
-      ],
-    },
-    {
-      type: "fourWay",
-      x: 1.1,
-      z: -3.2,
-      rotation: 0.8,
-      products: [
-        "crestHoodCrimson",
-        "crestHoodNavy",
-        "crestHoodOxford",
-        "proWeaveHoodOatmeal",
-      ],
-    },
-    {
-      type: "fourWay",
-      x: 2.4,
-      z: -1.0,
-      rotation: 0.8,
-      products: [
-        "benchmarkCrewNavy",
-        "benchmarkCrewRed",
-        "benchmarkCrewOxford",
-        "proWeaveCrewBlack",
-      ],
-    },
-    {
-      type: "fourWay",
-      x: 4.9,
-      z: 0.2,
-      rotation: 0.8,
-      products: [
-        "crestTeeOxford",
-        "crestTeeNavy",
-        "crestTeeWhite",
-        "harvardArcTeeCrimson",
-      ],
-    },
-    {
-      type: "fourWay",
-      x: -6.1,
-      z: 4.0,
-      rotation: 0.8,
-      products: [
-        "plaidPajamaCrimson",
-        "plaidPajamaGrey",
-        "garityShortsCrimson",
-        "championSweatpantsGrey",
-      ],
-    },
-    {
-      type: "fourWay",
-      x: 0.6,
-      z: 4.3,
-      rotation: 0.8,
-      products: [
-        "hSweaterCrimson",
-        "hSweaterCream",
-        "arcCrewCrimson",
-        "arcCrewOxford",
-      ],
-    },
-    {
-      type: "fourWay",
-      x: 3.8,
-      z: 3.7,
-      rotation: 0.8,
-      products: [
-        "nikePoloBlack",
-        "nikePoloCrimson",
-        "hoodedArcCrimson",
-        "hoodedArcOxford",
-      ],
-    },
-    {
-      type: "horizontal",
-      x: 0.7,
-      z: -4.0,
-      rotation: 0.45,
-      products: [
-        "crestHoodCrimson",
-        "crestHoodNavy",
-        "crestHoodOxford",
-        "proWeaveHoodCrimson",
-      ],
-    },
-    {
-      type: "table",
-      x: -6.1,
-      z: 0.5,
-      rotation: 0,
-      products: [
-        "harvardArcTeeCrimson",
-        "harvardArcTeeOxford",
-        "harvardArcTeeBlack",
-        "harvardArcTeeWhite",
-      ],
-    },
-    {
-      type: "table",
-      x: -1.2,
-      z: 1.2,
-      rotation: 0.45,
-      products: [
-        "benchmarkCrewNavy",
-        "benchmarkCrewRed",
-        "benchmarkCrewOxford",
-        "proWeaveCrewOxford",
-      ],
-    },
-  ];
+  const [fixtures, setFixtures] = useState(startingFixtures);
+  const [selectedId, setSelectedId] = useState("Rack 1");
 
-  const wallProducts = [
-    "harvardArcTeeCrimson",
-    "harvardArcTeeOxford",
-    "harvardArcTeeBlack",
-    "harvardArcTeeWhite",
-    "crestTeeOxford",
-    "crestTeeNavy",
-    "crestTeeWhite",
-    "crestHoodCrimson",
-    "crestHoodNavy",
-    "benchmarkCrewRed",
-    "benchmarkCrewOxford",
-    "proWeaveCrewBlack",
-  ];
+  const selectedFixture = fixtures.find((f) => f.id === selectedId);
+
+  function moveSelected(dx, dz) {
+    setFixtures((current) =>
+      current.map((f) =>
+        f.id === selectedId ? { ...f, x: f.x + dx, z: f.z + dz } : f
+      )
+    );
+  }
+
+  function rotateSelected(amount) {
+    setFixtures((current) =>
+      current.map((f) =>
+        f.id === selectedId ? { ...f, rotation: f.rotation + amount } : f
+      )
+    );
+  }
+
+  function resetLayout() {
+    setFixtures(startingFixtures);
+    setSelectedId("Rack 1");
+  }
+
+  const buttonStyle = {
+    padding: "10px 14px",
+    borderRadius: "10px",
+    border: "1px solid #ccc",
+    background: "white",
+    cursor: "pointer",
+    fontWeight: "bold",
+  };
 
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#f2f2f2" }}>
-      <Canvas camera={{ position: [18, 18, 18], fov: 55 }} shadows>
+      <div
+        style={{
+          position: "absolute",
+          top: 16,
+          left: 16,
+          zIndex: 10,
+          background: "rgba(255,255,255,0.95)",
+          padding: 16,
+          borderRadius: 16,
+          boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+          width: 280,
+          fontFamily: "Arial",
+        }}
+      >
+        <h3 style={{ margin: "0 0 8px" }}>Move Fixtures</h3>
+
+        <select
+          value={selectedId}
+          onChange={(e) => setSelectedId(e.target.value)}
+          style={{
+            width: "100%",
+            padding: 10,
+            borderRadius: 10,
+            marginBottom: 12,
+          }}
+        >
+          {fixtures.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.id}
+            </option>
+          ))}
+        </select>
+
+        <div style={{ fontSize: 13, marginBottom: 10 }}>
+          <b>Selected:</b> {selectedFixture?.id}
+          <br />
+          x: {selectedFixture?.x.toFixed(1)} | z:{" "}
+          {selectedFixture?.z.toFixed(1)} | rot:{" "}
+          {selectedFixture?.rotation.toFixed(2)}
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 8,
+            marginBottom: 10,
+          }}
+        >
+          <span></span>
+          <button style={buttonStyle} onClick={() => moveSelected(0, -0.2)}>
+            ↑
+          </button>
+          <span></span>
+
+          <button style={buttonStyle} onClick={() => moveSelected(-0.2, 0)}>
+            ←
+          </button>
+          <button style={buttonStyle} onClick={() => moveSelected(0, 0.2)}>
+            ↓
+          </button>
+          <button style={buttonStyle} onClick={() => moveSelected(0.2, 0)}>
+            →
+          </button>
+        </div>
+
+        <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+          <button style={buttonStyle} onClick={() => rotateSelected(-0.15)}>
+            Rotate -
+          </button>
+          <button style={buttonStyle} onClick={() => rotateSelected(0.15)}>
+            Rotate +
+          </button>
+        </div>
+
+        <button style={{ ...buttonStyle, width: "100%" }} onClick={resetLayout}>
+          Reset Layout
+        </button>
+      </div>
+
+      <Canvas
+        camera={{ position: [18, 18, 18], fov: 55 }}
+        shadows
+        onPointerMissed={() => setSelectedId("")}
+      >
         <ambientLight intensity={0.6} />
         <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
 
@@ -504,16 +551,40 @@ export default function App() {
         <WallSegment start={[-3.2, 7.5]} end={[-8.5, 7.5]} />
         <WallSegment start={[-8.5, 7.5]} end={[-8.5, -7.5]} />
 
-        {fixtures.map((f, i) => {
-          if (f.type === "fourWay") {
-            return <FourWayRack key={i} {...f} />;
+        {fixtures.map((fixture) => {
+          if (fixture.type === "fourWay") {
+            return (
+              <FourWayRack
+                key={fixture.id}
+                fixture={fixture}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+              />
+            );
           }
-          if (f.type === "horizontal") {
-            return <HorizontalRack key={i} {...f} />;
+
+          if (fixture.type === "horizontal") {
+            return (
+              <HorizontalRack
+                key={fixture.id}
+                fixture={fixture}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+              />
+            );
           }
-          if (f.type === "table") {
-            return <DisplayTable key={i} {...f} />;
+
+          if (fixture.type === "table") {
+            return (
+              <DisplayTable
+                key={fixture.id}
+                fixture={fixture}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+              />
+            );
           }
+
           return null;
         })}
 
@@ -521,75 +592,35 @@ export default function App() {
           x={-7.2}
           z={-7.25}
           rotation={0}
-          product={wallProducts[0]}
+          product="harvardArcTeeCrimson"
         />
         <WallHookRack
           x={-5.7}
           z={-7.25}
           rotation={0}
-          product={wallProducts[1]}
+          product="harvardArcTeeOxford"
         />
         <WallHookRack
           x={-4.3}
           z={-7.25}
           rotation={0}
-          product={wallProducts[2]}
+          product="harvardArcTeeBlack"
         />
         <WallHookRack
           x={-3.0}
           z={-7.25}
           rotation={0}
-          product={wallProducts[3]}
+          product="harvardArcTeeWhite"
         />
         <WallHookRack
           x={-1.7}
           z={-7.25}
           rotation={0}
-          product={wallProducts[4]}
-        />
-        <WallHookRack
-          x={0.8}
-          z={-7.15}
-          rotation={-0.18}
-          product={wallProducts[5]}
-        />
-        <WallHookRack
-          x={2.3}
-          z={-6.4}
-          rotation={-0.72}
-          product={wallProducts[6]}
-        />
-        <WallHookRack
-          x={3.7}
-          z={-5.0}
-          rotation={-0.72}
-          product={wallProducts[7]}
-        />
-        <WallHookRack
-          x={5.0}
-          z={-3.6}
-          rotation={-0.72}
-          product={wallProducts[8]}
-        />
-        <WallHookRack
-          x={6.2}
-          z={-2.0}
-          rotation={-1.02}
-          product={wallProducts[9]}
-        />
-        <WallHookRack
-          x={7.0}
-          z={-0.4}
-          rotation={-1.02}
-          product={wallProducts[10]}
-        />
-        <WallHookRack
-          x={7.5}
-          z={1.4}
-          rotation={-1.02}
-          product={wallProducts[11]}
+          product="crestTeeOxford"
         />
 
         <OrbitControls enableDamping dampingFactor={0.1} />
       </Canvas>
     </div>
+  );
+}
