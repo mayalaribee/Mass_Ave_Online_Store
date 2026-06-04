@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls, Text } from "@react-three/drei";
+import { OrbitControls, Html } from "@react-three/drei";
 import { TextureLoader } from "three";
 
 const catalog = {
@@ -92,9 +92,8 @@ const catalog = {
 };
 
 function ProductCard({ productId, x = 0, y = 1.2, z = 0, scale = 1 }) {
-  const product = catalog[productId];
+  const product = catalog[productId] || catalog.harvardArcTeeCrimson;
   const texture = useLoader(TextureLoader, product.image);
-
   return (
     <group position={[x, y, z]} scale={scale}>
       <mesh>
@@ -107,17 +106,24 @@ function ProductCard({ productId, x = 0, y = 1.2, z = 0, scale = 1 }) {
 
 function FixtureLabel({ id, selected }) {
   return (
-    <Text
-      position={[0, 2.35, 0]}
-      fontSize={0.28}
-      color={selected ? "blue" : "black"}
-      anchorX="center"
-    >
-      {id}
-    </Text>
+    <Html position={[0, 2.4, 0]} center>
+      <div
+        style={{
+          background: selected ? "#2563eb" : "white",
+          color: selected ? "white" : "black",
+          padding: "4px 8px",
+          borderRadius: "8px",
+          fontSize: "12px",
+          fontWeight: "bold",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {id}
+      </div>
+    </Html>
   );
 }
-
 function WallSegment({ start, end, height = 3.5 }) {
   const [x1, z1] = start;
   const [x2, z2] = end;
