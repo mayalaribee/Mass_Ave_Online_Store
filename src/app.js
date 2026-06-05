@@ -1,99 +1,83 @@
 import React, { useState } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls, Html } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { TextureLoader } from "three";
 
 const catalog = {
-  crestTeeOxford: {
-    name: "Crest T-Shirt Oxford",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Crest-T-Shirt-Quality-199894672.jpg?v=1754063343&width=1220",
-  },
-  crestTeeNavy: {
-    name: "Crest T-Shirt Navy",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Crest-T-Shirt-Quality-199895040.jpg?v=1754063343&width=1220",
-  },
-  crestTeeWhite: {
-    name: "Crest T-Shirt White",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/HarvardCrestT-Shirt_White.jpg?v=1754063343&width=1220",
-  },
   harvardArcTeeCrimson: {
-    name: "Harvard Arc T-Shirt Crimson",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199895987.jpg?v=1750257252&width=1220",
   },
   harvardArcTeeOxford: {
-    name: "Harvard Arc T-Shirt Oxford",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199896729.jpg?v=1750257252&width=1220",
   },
   harvardArcTeeBlack: {
-    name: "Harvard Arc T-Shirt Black",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199896311.jpg?v=1750257252&width=1220",
   },
   harvardArcTeeWhite: {
-    name: "Harvard Arc T-Shirt White",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/HarvardArcT-Shirt_White.jpg?v=1754063103&width=1220",
   },
+  crestTeeOxford: {
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Crest-T-Shirt-Quality-199894672.jpg?v=1754063343&width=1220",
+  },
+  crestTeeNavy: {
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Crest-T-Shirt-Quality-199895040.jpg?v=1754063343&width=1220",
+  },
+  crestTeeWhite: {
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/HarvardCrestT-Shirt_White.jpg?v=1754063343&width=1220",
+  },
   crestHoodCrimson: {
-    name: "Crest Hood Crimson",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Hooded-Crest-Sweatshirt-Quality-199988176.jpg?v=1720623769&width=1220",
   },
   crestHoodNavy: {
-    name: "Crest Hood Navy",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Hooded-Crest-Sweatshirt-Quality-199987681.jpg?v=1720623777&width=1220",
   },
   crestHoodOxford: {
-    name: "Crest Hood Oxford",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Hooded-Crest-Sweatshirt-Quality-199988554.jpg?v=1720623764&width=1220",
   },
-  proWeaveHoodCrimson: {
-    name: "Pro-Weave Hood Crimson",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Pro-Weave-Hood-Quality-199932325.jpg?v=1720622066&width=1220",
-  },
-  proWeaveHoodOatmeal: {
-    name: "Pro-Weave Hood Oatmeal",
-    image:
-      "https://www.theharvardshop.com/cdn/shop/files/Pro-Weave-Hood-Quality-199931913.jpg?v=1720622085&width=1220",
-  },
   benchmarkCrewNavy: {
-    name: "Benchmark Crew Navy",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Benchmark-Crew-Ouray-200008257.jpg?v=1720624426&width=1220",
   },
   benchmarkCrewRed: {
-    name: "Benchmark Crew Red",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Benchmark-Crew-Ouray-200008852.jpg?v=1720624387&width=1220",
   },
   benchmarkCrewOxford: {
-    name: "Benchmark Crew Oxford",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Benchmark-Crew-Ouray-200009444.jpg?v=1720624384&width=1220",
   },
   proWeaveCrewBlack: {
-    name: "Pro-Weave Crew Black",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Pro-Weave-Crewneck-Quality-199940174.jpg?v=1750257160&width=1220",
   },
   proWeaveCrewOxford: {
-    name: "Pro-Weave Crew Oxford",
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Pro-WeaveCrewneck_Oatmeal.jpg?v=1754063820&width=1220",
+  },
+  proWeaveHoodCrimson: {
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Pro-Weave-Hood-Quality-199932325.jpg?v=1720622066&width=1220",
+  },
+  proWeaveHoodOatmeal: {
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Pro-Weave-Hood-Quality-199931913.jpg?v=1720622085&width=1220",
   },
 };
 
 function ProductCard({ productId, x = 0, y = 1.2, z = 0, scale = 1 }) {
   const product = catalog[productId] || catalog.harvardArcTeeCrimson;
   const texture = useLoader(TextureLoader, product.image);
+
   return (
     <group position={[x, y, z]} scale={scale}>
       <mesh>
@@ -104,29 +88,10 @@ function ProductCard({ productId, x = 0, y = 1.2, z = 0, scale = 1 }) {
   );
 }
 
-function FixtureLabel({ id, selected }) {
-  return (
-    <Html position={[0, 2.4, 0]} center>
-      <div
-        style={{
-          background: selected ? "#2563eb" : "white",
-          color: selected ? "white" : "black",
-          padding: "4px 8px",
-          borderRadius: "8px",
-          fontSize: "12px",
-          fontWeight: "bold",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {id}
-      </div>
-    </Html>
-  );
-}
 function WallSegment({ start, end, height = 3.5 }) {
   const [x1, z1] = start;
   const [x2, z2] = end;
+
   const length = Math.sqrt((x2 - x1) ** 2 + (z2 - z1) ** 2);
   const x = (x1 + x2) / 2;
   const z = (z1 + z2) / 2;
@@ -153,8 +118,6 @@ function FourWayRack({ fixture, selectedId, setSelectedId }) {
         setSelectedId(fixture.id);
       }}
     >
-      <FixtureLabel id={fixture.id} selected={selected} />
-
       <mesh position={[0, 1, 0]}>
         <cylinderGeometry args={[0.05, 0.05, 2]} />
         <meshStandardMaterial color="#777" />
@@ -177,8 +140,8 @@ function FourWayRack({ fixture, selectedId, setSelectedId }) {
       ))}
 
       <mesh position={[0, 0.05, 0]}>
-        <cylinderGeometry args={[0.45, 0.45, 0.1, 32]} />
-        <meshStandardMaterial color={selected ? "#60a5fa" : "#cfcfcf"} />
+        <cylinderGeometry args={[0.5, 0.5, 0.1, 32]} />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#cfcfcf"} />
       </mesh>
     </group>
   );
@@ -196,11 +159,9 @@ function DisplayTable({ fixture, selectedId, setSelectedId }) {
         setSelectedId(fixture.id);
       }}
     >
-      <FixtureLabel id={fixture.id} selected={selected} />
-
       <mesh position={[0, 0.45, 0]}>
         <boxGeometry args={[2.4, 0.2, 1.15]} />
-        <meshStandardMaterial color={selected ? "#60a5fa" : "#8b5a2b"} />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#8b5a2b"} />
       </mesh>
 
       {fixture.products.slice(0, 4).map((p, i) => (
@@ -229,8 +190,6 @@ function HorizontalRack({ fixture, selectedId, setSelectedId }) {
         setSelectedId(fixture.id);
       }}
     >
-      <FixtureLabel id={fixture.id} selected={selected} />
-
       <mesh position={[0, 1.4, 0]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.04, 0.04, 2.5]} />
         <meshStandardMaterial color={selected ? "#2563eb" : "#777"} />
@@ -445,7 +404,7 @@ export default function App() {
   }
 
   const buttonStyle = {
-    padding: "10px 14px",
+    padding: "10px",
     borderRadius: "10px",
     border: "1px solid #ccc",
     background: "white",
@@ -535,11 +494,7 @@ export default function App() {
         </button>
       </div>
 
-      <Canvas
-        camera={{ position: [18, 18, 18], fov: 55 }}
-        shadows
-        onPointerMissed={() => setSelectedId("")}
-      >
+      <Canvas camera={{ position: [18, 18, 18], fov: 55 }} shadows>
         <ambientLight intensity={0.6} />
         <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
 
