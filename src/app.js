@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 // import { OrbitControls } from "@react-three/drei";
 import { TextureLoader } from "three";
@@ -412,7 +412,14 @@ const startingFixtures = [
   },
 ];
 export default function App() {
-  const [fixtures, setFixtures] = useState(startingFixtures);
+  const [fixtures, setFixtures] = useState(() => {
+  const saved = localStorage.getItem("storeLayout");
+  return saved ? JSON.parse(saved) : startingFixtures;
+});
+
+useEffect(() => {
+  localStorage.setItem("storeLayout", JSON.stringify(fixtures));
+}, [fixtures]);
   const [selectedId, setSelectedId] = useState("Rack 1");
 
   const selectedFixture = fixtures.find((f) => f.id === selectedId);
@@ -434,9 +441,10 @@ export default function App() {
   }
 
   function resetLayout() {
-    setFixtures(startingFixtures);
-    setSelectedId("Rack 1");
-  }
+  localStorage.removeItem("storeLayout");
+  setFixtures(startingFixtures);
+  setSelectedId("Rack 1");
+}
 
   const buttonStyle = {
     padding: "10px",
