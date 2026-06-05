@@ -242,7 +242,29 @@ function WallHookRack({ x, z, rotation = 0, product }) {
     </group>
   );
 }
+function ThreeWayRack({ fixture, selectedId, setSelectedId }) {
+  const selected = selectedId === fixture.id;
 
+  return (
+    <group
+      position={[fixture.x, 0, fixture.z]}
+      rotation={[0, fixture.rotation, 0]}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedId(fixture.id);
+      }}
+    >
+      {/* base */}
+      <mesh position={[0, 0.05, 0]}>
+        <boxGeometry args={[3.0, 0.1, 0.6]} />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#cfcfcf"} />
+      </mesh>
+
+      {/* legs */}
+      <mesh position={[-1.35, 0.75, 0]}>
+        <cylinderGeometry args={[0.04, 0.04, 1.4]} />
+        <meshStandardMaterial color="#777" />
+     
 const startingFixtures = [
   {
     id: "Rack 1",
