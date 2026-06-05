@@ -264,7 +264,8 @@ function ThreeWayRack({ fixture, selectedId, setSelectedId }) {
       <mesh position={[-1.35, 0.75, 0]}>
         <cylinderGeometry args={[0.04, 0.04, 1.4]} />
         <meshStandardMaterial color="#777" />
-         </group>
+        </mesh>
+        </group>
   );
 }
 const startingFixtures = [
