@@ -399,7 +399,6 @@ const startingFixtures = [
       "proWeaveCrewOxford",
     ],
   },
-];
 {
   id: "3-Way Rack 1",
   type: "threeWay",
@@ -410,8 +409,9 @@ const startingFixtures = [
     "crestHoodCrimson",
     "crestHoodOxford",
     "crestHoodNavy",
-  ],
-},
+    ],
+  },
+];
 export default function App() {
   const [fixtures, setFixtures] = useState(startingFixtures);
   const [selectedId, setSelectedId] = useState("Rack 1");
