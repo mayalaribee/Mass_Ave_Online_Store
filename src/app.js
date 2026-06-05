@@ -402,7 +402,7 @@ const startingFixtures = [
   id: "3-Way Rack 1",
   type: "threeWay",
   x: 0,
-  z: 2.2,
+  z: .8,
   rotation: 0,
   products: [
     "crestHoodCrimson",
