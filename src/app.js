@@ -211,13 +211,12 @@ function HorizontalRack({ fixture, selectedId, setSelectedId }) {
       </mesh>
 
       {fixture.products.slice(0, 5).map((p, i) => (
-        <ProductCard
-          key={i}
-          productId={p}
-          x={-0.8 + i * 0.4}
+       <ProductCard
+          productId={fixture.products[i % fixture.products.length]}
+          x={-0.75 + i * 0.75}
           y={1.15}
-          z={0}
-          scale={0.65}
+          z={0.15}
+          scale={0.8}
         />
       ))}
     </group>
@@ -254,11 +253,11 @@ function ThreeWayRack({ fixture, selectedId, setSelectedId }) {
         setSelectedId(fixture.id);
       }}
     >
-      {/* base */}
-      <mesh position={[0, 0.05, 0]}>
-        <boxGeometry args={[3.0, 0.1, 0.6]} />
-        <meshStandardMaterial color={selected ? "#2563eb" : "#cfcfcf"} />
-      </mesh>
+     {/* base */}
+  <mesh position={[0, 0.05, 0]}>
+    <boxGeometry args={[2.4, 0.1, 0.45]} />
+    <meshStandardMaterial color={selected ? "#2563eb" : "#cfcfcf"} />
+  </mesh>
 
       {/* legs */}
       <mesh position={[-1.35, 0.75, 0]}>
