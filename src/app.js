@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+// import { OrbitControls } from "@react-three/drei";
 import { TextureLoader } from "three";
 
 const catalog = {
@@ -580,7 +580,7 @@ export default function App() {
           product="crestTeeOxford"
         />
 
-        <OrbitControls enableDamping dampingFactor={0.1} />
+       
       </Canvas>
     </div>
   );
