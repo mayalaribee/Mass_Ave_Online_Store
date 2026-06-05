@@ -400,7 +400,18 @@ const startingFixtures = [
     ],
   },
 ];
-
+{
+  id: "3-Way Rack 1",
+  type: "threeWay",
+  x: 0,
+  z: 2.2,
+  rotation: 0,
+  products: [
+    "crestHoodCrimson",
+    "crestHoodOxford",
+    "crestHoodNavy",
+  ],
+},
 export default function App() {
   const [fixtures, setFixtures] = useState(startingFixtures);
   const [selectedId, setSelectedId] = useState("Rack 1");
@@ -559,7 +570,16 @@ export default function App() {
               />
             );
           }
-
+          if (fixture.type === "threeWay") {
+            return (
+              <ThreeWayRack
+                key={fixture.id}
+                fixture={fixture}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+              />
+            );
+          }
           if (fixture.type === "table") {
             return (
               <DisplayTable
