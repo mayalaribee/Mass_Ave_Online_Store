@@ -412,13 +412,18 @@ const startingFixtures = [
   },
 ];
 export default function App() {
-  const [fixtures, setFixtures] = useState(() => {
-  const saved = localStorage.getItem("storeLayout");
-  return saved ? JSON.parse(saved) : startingFixtures;
-});
+  const [fixtures, setFixtures] = useState(startingFixtures);
 
 useEffect(() => {
-  localStorage.setItem("storeLayout", JSON.stringify(fixtures));
+  const savedLayout = window.localStorage.getItem("storeLayout");
+
+  if (savedLayout) {
+    setFixtures(JSON.parse(savedLayout));
+  }
+}, []);
+
+useEffect(() => {
+  window.localStorage.setItem("storeLayout", JSON.stringify(fixtures));
 }, [fixtures]);
   const [selectedId, setSelectedId] = useState("Rack 1");
 
@@ -536,7 +541,15 @@ useEffect(() => {
           Reset Layout
         </button>
       </div>
-
+        <button
+          style={{ ...buttonStyle, width: "100%", marginTop: 10 }}
+          onClick={() => {
+            window.localStorage.setItem("storeLayout", JSON.stringify(fixtures));
+            alert("Layout saved!");
+          }}
+        >
+          Save Layout
+        </button>
       <Canvas camera={{ position: [18, 18, 18], fov: 55 }} shadows>
         <ambientLight intensity={0.6} />
         <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
