@@ -526,8 +526,119 @@ const startingFixtures = [
   },
 ];
 
+
+const storeOptions = [
+  { id: "massAve", name: "Mass Ave" },
+  { id: "mtAuburn", name: "Mt. Auburn" },
+  { id: "jfk", name: "JFK" },
+];
+
+const wallsByStore = {
+  massAve: [
+    [[-8.5, -7.5], [1.5, -7.5]],
+    [[1.5, -7.5], [7.4, -1.8]],
+    [[7.4, -1.8], [8.7, 1.8]],
+    [[8.7, 1.8], [5.8, 5.3]],
+    [[5.8, 5.3], [0.8, 7.5]],
+    [[0.8, 7.5], [-1.1, 7.5]],
+    [[-3.2, 7.5], [-8.5, 7.5]],
+    [[-8.5, 7.5], [-8.5, -7.5]],
+  ],
+
+  // Traced from the 65 Mt. Auburn existing plan PDF.
+  // It is intentionally simplified into wall segments so the editor remains easy to use.
+  mtAuburn: [
+    // Upper-left storage block
+    [[-8.3, -8.4], [-2.9, -8.4]],
+    [[-8.3, -8.4], [-8.3, -4.9]],
+    [[-8.3, -4.9], [-7.6, -4.9]],
+    [[-7.6, -4.9], [-7.6, -2.1]],
+    [[-7.6, -2.1], [-8.0, -2.1]],
+    [[-8.0, -2.1], [-8.0, 0.7]],
+    [[-8.0, 0.7], [-6.7, 0.7]],
+    [[-6.7, 0.7], [-6.2, 1.5]],
+    [[-6.2, 1.5], [-5.3, 1.5]],
+    [[-5.3, 1.5], [-4.7, 2.0]],
+    [[-4.7, 2.0], [-3.0, 2.0]],
+    [[-3.0, 2.0], [-2.9, -8.4]],
+
+    // Upper-middle storage room
+    [[-2.9, -7.8], [-0.5, -7.8]],
+    [[-0.5, -7.8], [-0.5, -6.8]],
+    [[-0.5, -6.8], [0.1, -6.8]],
+    [[0.1, -6.8], [0.1, -5.4]],
+    [[0.1, -5.4], [-2.9, -5.4]],
+
+    // Main long retail room
+    [[0.1, -8.0], [4.9, -8.0]],
+    [[4.9, -8.0], [4.9, 9.1]],
+    [[4.9, 9.1], [3.0, 9.1]],
+    [[3.0, 9.1], [3.0, 8.2]],
+    [[3.0, 8.2], [1.2, 8.2]],
+    [[1.2, 8.2], [1.2, 9.1]],
+    [[1.2, 9.1], [-0.4, 9.1]],
+    [[-0.4, 9.1], [-0.4, 4.6]],
+    [[-0.4, 4.6], [-1.0, 4.6]],
+    [[-1.0, 4.6], [-1.0, 2.0]],
+    [[-1.0, 2.0], [-2.9, 2.0]],
+
+    // Restroom / fitting-room support space along the left side of the sales floor
+    [[-1.0, -2.6], [0.6, -2.6]],
+    [[0.6, -2.6], [0.6, 0.2]],
+    [[0.6, 0.2], [-0.4, 0.2]],
+    [[-0.4, 0.2], [-0.4, -1.0]],
+    [[-0.4, -1.0], [-1.0, -1.0]],
+  ],
+
+  jfk: [
+    [[-7.5, -7.5], [7.5, -7.5]],
+    [[7.5, -7.5], [7.5, 7.5]],
+    [[7.5, 7.5], [-7.5, 7.5]],
+    [[-7.5, 7.5], [-7.5, -7.5]],
+  ],
+};
+
+const floorSizesByStore = {
+  massAve: [22, 20],
+  mtAuburn: [18, 22],
+  jfk: [18, 18],
+};
+
+const wallHooksByStore = {
+  massAve: [
+    { x: -7.2, z: -7.25, rotation: 0, product: "harvardArcTeeCrimson" },
+    { x: -5.7, z: -7.25, rotation: 0, product: "harvardArcTeeOxford" },
+    { x: -4.3, z: -7.25, rotation: 0, product: "harvardArcTeeBlack" },
+    { x: -3.0, z: -7.25, rotation: 0, product: "harvardArcTeeWhite" },
+    { x: -1.7, z: -7.25, rotation: 0, product: "crestTeeOxford" },
+  ],
+  mtAuburn: [],
+  jfk: [],
+};
+
+const startingFixturesByStore = {
+  massAve: startingFixtures,
+  mtAuburn: [],
+  jfk: [],
+};
+
+function cloneFixtures(fixtures) {
+  return fixtures.map((fixture) => ({
+    ...fixture,
+    products: [...(fixture.products || [])],
+  }));
+}
+
+function getStoredLayoutKey(storeId) {
+  return `storeLayout-${storeId}`;
+}
+
+function getDefaultFixturesForStore(storeId) {
+  return cloneFixtures(startingFixturesByStore[storeId] || []);
+}
 export default function App() {
-  const [fixtures, setFixtures] = useState(startingFixtures);
+  const [activeStoreId, setActiveStoreId] = useState("massAve");
+  const [fixtures, setFixtures] = useState(() => getDefaultFixturesForStore("massAve"));
   const [selectedId, setSelectedId] = useState("Rack 1");
   const [customProducts, setCustomProducts] = useState({});
   const [newRackType, setNewRackType] = useState("fourWay");
@@ -541,12 +652,7 @@ export default function App() {
   }));
 
   useEffect(() => {
-    const savedLayout = window.localStorage.getItem("storeLayout");
     const savedProducts = window.localStorage.getItem("storeProducts");
-
-    if (savedLayout) {
-      setFixtures(JSON.parse(savedLayout));
-    }
 
     if (savedProducts) {
       setCustomProducts(JSON.parse(savedProducts));
@@ -554,8 +660,21 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem("storeLayout", JSON.stringify(fixtures));
-  }, [fixtures]);
+    const legacyMassAveLayout =
+      activeStoreId === "massAve" ? window.localStorage.getItem("storeLayout") : null;
+    const savedLayout =
+      window.localStorage.getItem(getStoredLayoutKey(activeStoreId)) || legacyMassAveLayout;
+    const nextFixtures = savedLayout
+      ? JSON.parse(savedLayout)
+      : getDefaultFixturesForStore(activeStoreId);
+
+    setFixtures(nextFixtures);
+    setSelectedId(nextFixtures[0]?.id || "");
+  }, [activeStoreId]);
+
+  useEffect(() => {
+    window.localStorage.setItem(getStoredLayoutKey(activeStoreId), JSON.stringify(fixtures));
+  }, [activeStoreId, fixtures]);
 
   useEffect(() => {
     window.localStorage.setItem("storeProducts", JSON.stringify(customProducts));
@@ -564,6 +683,8 @@ export default function App() {
   const selectedFixture = fixtures.find((f) => f.id === selectedId);
 
   function moveSelected(dx, dz) {
+    if (!selectedId) return;
+
     setFixtures((current) =>
       current.map((f) =>
         f.id === selectedId ? { ...f, x: f.x + dx, z: f.z + dz } : f
@@ -572,6 +693,8 @@ export default function App() {
   }
 
   function rotateSelected(amount) {
+    if (!selectedId) return;
+
     setFixtures((current) =>
       current.map((f) =>
         f.id === selectedId ? { ...f, rotation: f.rotation + amount } : f
@@ -647,50 +770,134 @@ export default function App() {
   }
 
   function resetLayout() {
-    localStorage.removeItem("storeLayout");
-    setFixtures(startingFixtures);
-    setSelectedId("Rack 1");
+    localStorage.removeItem(getStoredLayoutKey(activeStoreId));
+    if (activeStoreId === "massAve") {
+      localStorage.removeItem("storeLayout");
+    }
+
+    const defaultFixtures = getDefaultFixturesForStore(activeStoreId);
+    setFixtures(defaultFixtures);
+    setSelectedId(defaultFixtures[0]?.id || "");
   }
+
+  const activeStore = storeOptions.find((store) => store.id === activeStoreId);
+  const activeWalls = wallsByStore[activeStoreId] || [];
+  const activeFloorSize = floorSizesByStore[activeStoreId] || [22, 20];
+  const activeWallHooks = wallHooksByStore[activeStoreId] || [];
 
   const buttonStyle = {
     padding: "10px",
-    borderRadius: "10px",
-    border: "1px solid #ccc",
+    borderRadius: "12px",
+    border: "1px solid #d8d3cc",
     background: "white",
     cursor: "pointer",
     fontWeight: "bold",
   };
 
+  const inputStyle = {
+    width: "100%",
+    padding: 10,
+    borderRadius: 12,
+    marginBottom: 8,
+    border: "1px solid #d8d3cc",
+    boxSizing: "border-box",
+  };
+
+  const sectionTitleStyle = {
+    margin: "0 0 8px",
+    fontSize: 15,
+    color: "#3b2f2f",
+    letterSpacing: "0.01em",
+  };
+
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#f2f2f2" }}>
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        background: "linear-gradient(135deg, #f7f3ee 0%, #ece3dc 100%)",
+        fontFamily: "Inter, Arial, sans-serif",
+      }}
+    >
       <div
         style={{
           position: "absolute",
           top: 16,
           left: 16,
+          right: 16,
+          zIndex: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          background: "rgba(255,255,255,0.92)",
+          border: "1px solid rgba(120, 72, 72, 0.14)",
+          padding: "12px 16px",
+          borderRadius: 20,
+          boxShadow: "0 14px 40px rgba(69, 32, 32, 0.14)",
+        }}
+      >
+        <div>
+          <div style={{ fontSize: 12, color: "#7f6b5f", fontWeight: 700 }}>
+            Harvard Shop Store Layout Editor
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: "#241515" }}>
+            {activeStore?.name}
+          </div>
+          <div style={{ fontSize: 11, color: "#8a7468", fontWeight: 700 }}>
+            {activeStoreId === "mtAuburn" ? "Floor plan traced from 65 Mt. Auburn PDF" : "Interactive fixture planner"}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 8 }}>
+          {storeOptions.map((store) => {
+            const active = activeStoreId === store.id;
+
+            return (
+              <button
+                key={store.id}
+                onClick={() => setActiveStoreId(store.id)}
+                style={{
+                  padding: "10px 16px",
+                  borderRadius: 999,
+                  border: active ? "1px solid #7f1d1d" : "1px solid #d8d3cc",
+                  background: active ? "#7f1d1d" : "white",
+                  color: active ? "white" : "#3b2f2f",
+                  cursor: "pointer",
+                  fontWeight: 800,
+                }}
+              >
+                {store.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          top: 96,
+          left: 16,
           zIndex: 10,
           background: "rgba(255,255,255,0.95)",
           padding: 16,
-          borderRadius: 16,
-          boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-          width: 320,
-          maxHeight: "calc(100vh - 32px)",
+          borderRadius: 20,
+          border: "1px solid rgba(120, 72, 72, 0.14)",
+          boxShadow: "0 14px 40px rgba(69, 32, 32, 0.14)",
+          width: 340,
+          maxHeight: "calc(100vh - 112px)",
           overflowY: "auto",
-          fontFamily: "Arial",
         }}
       >
-        <h3 style={{ margin: "0 0 8px" }}>Move Fixtures</h3>
+        <h3 style={sectionTitleStyle}>Move Fixtures</h3>
 
         <select
           value={selectedId}
           onChange={(e) => setSelectedId(e.target.value)}
-          style={{
-            width: "100%",
-            padding: 10,
-            borderRadius: 10,
-            marginBottom: 12,
-          }}
+          style={{ ...inputStyle, marginBottom: 12 }}
         >
+          {fixtures.length === 0 && <option value="">No fixtures yet</option>}
           {fixtures.map((f) => (
             <option key={f.id} value={f.id}>
               {f.id}
@@ -746,7 +953,7 @@ export default function App() {
         <button
           style={{ ...buttonStyle, width: "100%", marginTop: 10 }}
           onClick={() => {
-            window.localStorage.setItem("storeLayout", JSON.stringify(fixtures));
+            window.localStorage.setItem(getStoredLayoutKey(activeStoreId), JSON.stringify(fixtures));
             window.localStorage.setItem("storeProducts", JSON.stringify(customProducts));
             alert("Layout saved!");
           }}
@@ -756,11 +963,11 @@ export default function App() {
 
         <hr style={{ margin: "14px 0", border: "none", borderTop: "1px solid #ddd" }} />
 
-        <h3 style={{ margin: "0 0 8px" }}>Add Rack</h3>
+        <h3 style={sectionTitleStyle}>Add Rack</h3>
         <select
           value={newRackType}
           onChange={(e) => setNewRackType(e.target.value)}
-          style={{ width: "100%", padding: 10, borderRadius: 10, marginBottom: 8 }}
+          style={inputStyle}
         >
           {Object.entries(rackTypes).map(([type, rack]) => (
             <option key={type} value={type}>
@@ -774,18 +981,18 @@ export default function App() {
 
         <hr style={{ margin: "14px 0", border: "none", borderTop: "1px solid #ddd" }} />
 
-        <h3 style={{ margin: "0 0 8px" }}>Add Product</h3>
+        <h3 style={sectionTitleStyle}>Add Product</h3>
         <input
           value={newProductName}
           onChange={(e) => setNewProductName(e.target.value)}
           placeholder="Product name"
-          style={{ width: "100%", padding: 10, borderRadius: 10, marginBottom: 8, border: "1px solid #ccc" }}
+          style={inputStyle}
         />
         <input
           value={newProductImage}
           onChange={(e) => setNewProductImage(e.target.value)}
           placeholder="Product image link"
-          style={{ width: "100%", padding: 10, borderRadius: 10, marginBottom: 8, border: "1px solid #ccc" }}
+          style={inputStyle}
         />
         <button style={{ ...buttonStyle, width: "100%" }} onClick={addProduct}>
           Add Product
@@ -795,13 +1002,13 @@ export default function App() {
           <>
             <hr style={{ margin: "14px 0", border: "none", borderTop: "1px solid #ddd" }} />
 
-            <h3 style={{ margin: "0 0 8px" }}>Products on Selected Rack</h3>
+            <h3 style={sectionTitleStyle}>Products on Selected Rack</h3>
             {Array.from({ length: getSlotCount(selectedFixture.type) }).map((_, slotIndex) => (
               <select
                 key={slotIndex}
                 value={selectedFixture.products?.[slotIndex] || ""}
                 onChange={(e) => assignProductToSlot(slotIndex, e.target.value)}
-                style={{ width: "100%", padding: 8, borderRadius: 8, marginBottom: 6 }}
+                style={{ ...inputStyle, padding: 8, marginBottom: 6 }}
               >
                 <option value="">Slot {slotIndex + 1}: Empty</option>
                 {productOptions.map((product) => (
@@ -828,18 +1035,13 @@ export default function App() {
         <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
 
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[22, 20]} />
+          <planeGeometry args={activeFloorSize} />
           <meshStandardMaterial color="#bfbfbf" />
         </mesh>
 
-        <WallSegment start={[-8.5, -7.5]} end={[1.5, -7.5]} />
-        <WallSegment start={[1.5, -7.5]} end={[7.4, -1.8]} />
-        <WallSegment start={[7.4, -1.8]} end={[8.7, 1.8]} />
-        <WallSegment start={[8.7, 1.8]} end={[5.8, 5.3]} />
-        <WallSegment start={[5.8, 5.3]} end={[0.8, 7.5]} />
-        <WallSegment start={[0.8, 7.5]} end={[-1.1, 7.5]} />
-        <WallSegment start={[-3.2, 7.5]} end={[-8.5, 7.5]} />
-        <WallSegment start={[-8.5, 7.5]} end={[-8.5, -7.5]} />
+        {activeWalls.map(([start, end], index) => (
+          <WallSegment key={`${activeStoreId}-wall-${index}`} start={start} end={end} />
+        ))}
 
         {fixtures.map((fixture) => {
           if (fixture.type === "fourWay") {
@@ -893,41 +1095,16 @@ export default function App() {
           return null;
         })}
 
-        <WallHookRack
-          x={-7.2}
-          z={-7.25}
-          rotation={0}
-          product="harvardArcTeeCrimson"
-          productCatalog={productCatalog}
-        />
-        <WallHookRack
-          x={-5.7}
-          z={-7.25}
-          rotation={0}
-          product="harvardArcTeeOxford"
-          productCatalog={productCatalog}
-        />
-        <WallHookRack
-          x={-4.3}
-          z={-7.25}
-          rotation={0}
-          product="harvardArcTeeBlack"
-          productCatalog={productCatalog}
-        />
-        <WallHookRack
-          x={-3.0}
-          z={-7.25}
-          rotation={0}
-          product="harvardArcTeeWhite"
-          productCatalog={productCatalog}
-        />
-        <WallHookRack
-          x={-1.7}
-          z={-7.25}
-          rotation={0}
-          product="crestTeeOxford"
-          productCatalog={productCatalog}
-        />
+        {activeWallHooks.map((hook, index) => (
+          <WallHookRack
+            key={`${activeStoreId}-wall-hook-${index}`}
+            x={hook.x}
+            z={hook.z}
+            rotation={hook.rotation}
+            product={hook.product}
+            productCatalog={productCatalog}
+          />
+        ))}
       </Canvas>
     </div>
   );
