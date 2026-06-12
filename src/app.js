@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
-// import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, PointerLockControls } from "@react-three/drei";
 import { TextureLoader } from "three";
 
 const catalog = {
@@ -105,7 +104,82 @@ const catalog = {
       "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199895987.jpg?v=1750257252&width=1220",
   },
 };
+function WindowSegment({ start, end, height = 3.2 }) {
+  const [x1, z1] = start;
+  const [x2, z2] = end;
 
+  const length = Math.sqrt((x2 - x1) ** 2 + (z2 - z1) ** 2);
+  const x = (x1 + x2) / 2;
+  const z = (z1 + z2) / 2;
+  const rotation = -Math.atan2(z2 - z1, x2 - x1);
+
+  return (
+    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+      <mesh position={[0, height / 2, 0]}>
+        <boxGeometry args={[length, height, 0.08]} />
+        <meshStandardMaterial
+          color="#bfe7ff"
+          transparent
+          opacity={0.35}
+          roughness={0.05}
+          metalness={0.1}
+        />
+      </mesh>
+
+      <mesh position={[0, height + 0.05, 0]}>
+        <boxGeometry args={[length, 0.12, 0.16]} />
+        <meshStandardMaterial color="#222" />
+      </mesh>
+
+      <mesh position={[0, 0.08, 0]}>
+        <boxGeometry args={[length, 0.12, 0.16]} />
+        <meshStandardMaterial color="#222" />
+      </mesh>
+
+      {[-0.33, 0, 0.33].map((p) => (
+        <mesh key={p} position={[length * p, height / 2, 0]}>
+          <boxGeometry args={[0.06, height, 0.16]} />
+          <meshStandardMaterial color="#222" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+function DoubleDoor({ x, z, rotation = 0 }) {
+  return (
+    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+      <mesh position={[-0.45, 1.15, 0]}>
+        <boxGeometry args={[0.85, 2.3, 0.08]} />
+        <meshStandardMaterial color="#111" />
+      </mesh>
+
+      <mesh position={[0.45, 1.15, 0]}>
+        <boxGeometry args={[0.85, 2.3, 0.08]} />
+        <meshStandardMaterial color="#111" />
+      </mesh>
+
+      <mesh position={[-0.45, 1.15, 0.04]}>
+        <boxGeometry args={[0.72, 1.9, 0.04]} />
+        <meshStandardMaterial color="#bfe7ff" transparent opacity={0.45} />
+      </mesh>
+
+      <mesh position={[0.45, 1.15, 0.04]}>
+        <boxGeometry args={[0.72, 1.9, 0.04]} />
+        <meshStandardMaterial color="#bfe7ff" transparent opacity={0.45} />
+      </mesh>
+
+      <mesh position={[-0.1, 1.05, 0.12]}>
+        <sphereGeometry args={[0.05, 16, 16]} />
+        <meshStandardMaterial color="#c8a24a" />
+      </mesh>
+
+      <mesh position={[0.1, 1.05, 0.12]}>
+        <sphereGeometry args={[0.05, 16, 16]} />
+        <meshStandardMaterial color="#c8a24a" />
+      </mesh>
+    </group>
+  );
+}
 const rackTypes = {
   fourWay: { label: "Four-Way Rack", slots: 4 },
   horizontal: { label: "Horizontal Rack", slots: 5 },
@@ -539,9 +613,6 @@ const wallsByStore = {
     [[1.5, -7.5], [7.4, -1.8]],
     [[7.4, -1.8], [8.7, 1.8]],
     [[8.7, 1.8], [5.8, 5.3]],
-    [[5.8, 5.3], [0.8, 7.5]],
-    [[0.8, 7.5], [-1.1, 7.5]],
-    [[-3.2, 7.5], [-8.5, 7.5]],
     [[-8.5, 7.5], [-8.5, -7.5]],
   ],
 
@@ -635,6 +706,14 @@ function getStoredLayoutKey(storeId) {
 
 function getDefaultFixturesForStore(storeId) {
   return cloneFixtures(startingFixturesByStore[storeId] || []);
+}
+function WoodFloor({ size = [22, 20] }) {
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={size} />
+      <meshStandardMaterial color="#a8753b" roughness={0.65} />
+    </mesh>
+  );
 }
 export default function App() {
   const [activeStoreId, setActiveStoreId] = useState("massAve");
@@ -1033,15 +1112,22 @@ export default function App() {
       <Canvas camera={{ position: [18, 18, 18], fov: 55 }} shadows>
         <ambientLight intensity={0.6} />
         <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
+          <OrbitControls enablePan enableZoom enableRotate />
 
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={activeFloorSize} />
-          <meshStandardMaterial color="#bfbfbf" />
-        </mesh>
+      <WoodFloor size={activeFloorSize} />
 
         {activeWalls.map(([start, end], index) => (
-          <WallSegment key={`${activeStoreId}-wall-${index}`} start={start} end={end} />
-        ))}
+      <WallSegment key={`${activeStoreId}-wall-${index}`} start={start} end={end} />
+    ))}
+    
+    {activeStoreId === "massAve" && (
+      <>
+        <WindowSegment start={[-8.5, 7.5]} end={[-3.2, 7.5]} />
+        <WindowSegment start={[-1.1, 7.5]} end={[0.8, 7.5]} />
+        <WindowSegment start={[0.8, 7.5]} end={[5.8, 5.3]} />
+        <DoubleDoor x={-2.15} z={7.5} rotation={0} />
+      </>
+    )}
 
         {fixtures.map((fixture) => {
           if (fixture.type === "fourWay") {
