@@ -1,5 +1,6 @@
+import React, { useEffect, useState } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls, PointerLockControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { TextureLoader } from "three";
 
 const catalog = {
@@ -1109,10 +1110,13 @@ export default function App() {
 
       </div>
 
-      <Canvas camera={{ position: [18, 18, 18], fov: 55 }} shadows>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
-          <OrbitControls enablePan enableZoom enableRotate />
+     <Canvas camera={{ position: [18, 18, 18], fov: 55 }} shadows>
+  <ambientLight intensity={0.6} />
+  <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
+
+  <OrbitControls enablePan enableZoom enableRotate />
+
+  <WoodFloor size={activeFloorSize} />
 
       <WoodFloor size={activeFloorSize} />
 
