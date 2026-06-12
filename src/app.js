@@ -186,6 +186,7 @@ const rackTypes = {
   horizontal: { label: "Horizontal Rack", slots: 5 },
   threeWay: { label: "Family / Six-Hook Rack", slots: 6 },
   table: { label: "Display Table", slots: 4 },
+  wallHook: { label: "Wall Hook Rack", slots: 2 },
 };
 
 function getSlotCount(type) {
@@ -360,25 +361,64 @@ function HorizontalRack({ fixture, selectedId, setSelectedId, productCatalog }) 
   );
 }
 
-function WallHookRack({ x, z, rotation = 0, product, productCatalog }) {
+function WallHookRack({
+  fixture,
+  selectedId,
+  setSelectedId,
+  productCatalog,
+  x,
+  z,
+  rotation = 0,
+  product,
+}) {
+  const isFixture = !!fixture;
+  const selected = fixture && selectedId === fixture.id;
+
+  const rackX = fixture ? fixture.x : x;
+  const rackZ = fixture ? fixture.z : z;
+  const rackRotation = fixture ? fixture.rotation : rotation;
+  const products = fixture ? fixture.products || [] : [product, product];
+
   return (
-    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+    <group
+      position={[rackX, 0, rackZ]}
+      rotation={[0, rackRotation, 0]}
+      onClick={(e) => {
+        if (!isFixture) return;
+        e.stopPropagation();
+        setSelectedId(fixture.id);
+      }}
+    >
       <mesh position={[0, 1.8, 0.35]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.025, 0.025, 0.7]} />
-        <meshStandardMaterial color="#9ca3af" />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#9ca3af"} />
       </mesh>
 
       <mesh position={[0, 1.0, 0.35]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.025, 0.025, 0.7]} />
-        <meshStandardMaterial color="#9ca3af" />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#9ca3af"} />
       </mesh>
 
-      <ProductCard productId={product} productCatalog={productCatalog} x={0} y={1.55} z={0.65} scale={0.75} />
-      <ProductCard productId={product} productCatalog={productCatalog} x={0} y={0.75} z={0.65} scale={0.75} />
+      <ProductCard
+        productId={products[0]}
+        productCatalog={productCatalog}
+        x={0}
+        y={1.55}
+        z={0.65}
+        scale={0.75}
+      />
+
+      <ProductCard
+        productId={products[1]}
+        productCatalog={productCatalog}
+        x={0}
+        y={0.75}
+        z={0.65}
+        scale={0.75}
+      />
     </group>
   );
 }
-
 function ThreeWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
   const selected = selectedId === fixture.id;
   const products = fixture.products || [];
@@ -1170,9 +1210,9 @@ export default function App() {
             );
           }
 
-          if (fixture.type === "table") {
+          if (fixture.type === "wallHook") {
             return (
-              <DisplayTable
+              <WallHookRack
                 key={fixture.id}
                 fixture={fixture}
                 selectedId={selectedId}
