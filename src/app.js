@@ -72,14 +72,72 @@ const catalog = {
     image:
       "https://www.theharvardshop.com/cdn/shop/files/Pro-Weave-Hood-Quality-199931913.jpg?v=1720622085&width=1220",
   },
+
+  // Temporary family tee entries. Replace these image URLs when you have the real links.
+  brotherTee: {
+    name: "Brother Tee",
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199895987.jpg?v=1750257252&width=1220",
+  },
+  sisterTee: {
+    name: "Sister Tee",
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199895987.jpg?v=1750257252&width=1220",
+  },
+  grandmaTee: {
+    name: "Grandma Tee",
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199895987.jpg?v=1750257252&width=1220",
+  },
+  grandpaTee: {
+    name: "Grandpa Tee",
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199895987.jpg?v=1750257252&width=1220",
+  },
+  momTee: {
+    name: "Mom Tee",
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199895987.jpg?v=1750257252&width=1220",
+  },
+  dadTee: {
+    name: "Dad Tee",
+    image:
+      "https://www.theharvardshop.com/cdn/shop/files/Harvard-Arc-T-Shirt-Quality-199895987.jpg?v=1750257252&width=1220",
+  },
 };
 
-function ProductCard({ productId, x = 0, y = 1.2, z = 0, scale = 1 }) {
-  const product = catalog[productId] || catalog.harvardArcTeeCrimson;
-  const texture = useLoader(TextureLoader, product.image);
+const rackTypes = {
+  fourWay: { label: "Four-Way Rack", slots: 4 },
+  horizontal: { label: "Horizontal Rack", slots: 5 },
+  threeWay: { label: "Family / Six-Hook Rack", slots: 6 },
+  table: { label: "Display Table", slots: 4 },
+};
+
+function getSlotCount(type) {
+  return rackTypes[type]?.slots || 4;
+}
+
+function makeEmptyProducts(type) {
+  return Array(getSlotCount(type)).fill(null);
+}
+
+function ProductCard({
+  productId,
+  productCatalog,
+  x = 0,
+  y = 1.2,
+  z = 0,
+  scale = 1,
+  rotation = [0, 0, 0],
+}) {
+  if (!productId) return null;
+
+  const product = productCatalog?.[productId];
+  const fallbackImage = catalog.harvardArcTeeCrimson.image;
+  const texture = useLoader(TextureLoader, product?.image || fallbackImage);
 
   return (
-    <group position={[x, y, z]} scale={scale}>
+    <group position={[x, y, z]} scale={scale} rotation={rotation}>
       <mesh>
         <boxGeometry args={[0.5, 0.65, 0.04]} />
         <meshStandardMaterial map={texture} />
@@ -105,7 +163,7 @@ function WallSegment({ start, end, height = 3.5 }) {
   );
 }
 
-function FourWayRack({ fixture, selectedId, setSelectedId }) {
+function FourWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
   const selected = selectedId === fixture.id;
   const arms = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2];
 
@@ -131,7 +189,8 @@ function FourWayRack({ fixture, selectedId, setSelectedId }) {
           </mesh>
 
           <ProductCard
-            productId={fixture.products[i % fixture.products.length]}
+            productId={fixture.products[i] || null}
+            productCatalog={productCatalog}
             x={0.55}
             y={1.15}
             z={0}
@@ -147,7 +206,7 @@ function FourWayRack({ fixture, selectedId, setSelectedId }) {
   );
 }
 
-function DisplayTable({ fixture, selectedId, setSelectedId }) {
+function DisplayTable({ fixture, selectedId, setSelectedId, productCatalog }) {
   const selected = selectedId === fixture.id;
 
   return (
@@ -168,6 +227,7 @@ function DisplayTable({ fixture, selectedId, setSelectedId }) {
         <ProductCard
           key={i}
           productId={p}
+          productCatalog={productCatalog}
           x={-0.75 + i * 0.5}
           y={0.83}
           z={0}
@@ -178,7 +238,7 @@ function DisplayTable({ fixture, selectedId, setSelectedId }) {
   );
 }
 
-function HorizontalRack({ fixture, selectedId, setSelectedId }) {
+function HorizontalRack({ fixture, selectedId, setSelectedId, productCatalog }) {
   const selected = selectedId === fixture.id;
 
   return (
@@ -211,8 +271,10 @@ function HorizontalRack({ fixture, selectedId, setSelectedId }) {
       </mesh>
 
       {fixture.products.slice(0, 5).map((p, i) => (
-       <ProductCard
-          productId={fixture.products[i % fixture.products.length]}
+        <ProductCard
+          key={i}
+          productId={p}
+          productCatalog={productCatalog}
           x={-0.75 + i * 0.75}
           y={1.15}
           z={0.15}
@@ -223,7 +285,7 @@ function HorizontalRack({ fixture, selectedId, setSelectedId }) {
   );
 }
 
-function WallHookRack({ x, z, rotation = 0, product }) {
+function WallHookRack({ x, z, rotation = 0, product, productCatalog }) {
   return (
     <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
       <mesh position={[0, 1.8, 0.35]} rotation={[Math.PI / 2, 0, 0]}>
@@ -236,13 +298,16 @@ function WallHookRack({ x, z, rotation = 0, product }) {
         <meshStandardMaterial color="#9ca3af" />
       </mesh>
 
-      <ProductCard productId={product} x={0} y={1.55} z={0.65} scale={0.75} />
-      <ProductCard productId={product} x={0} y={0.75} z={0.65} scale={0.75} />
+      <ProductCard productId={product} productCatalog={productCatalog} x={0} y={1.55} z={0.65} scale={0.75} />
+      <ProductCard productId={product} productCatalog={productCatalog} x={0} y={0.75} z={0.65} scale={0.75} />
     </group>
   );
 }
-function ThreeWayRack({ fixture, selectedId, setSelectedId }) {
+
+function ThreeWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
   const selected = selectedId === fixture.id;
+  const products = fixture.products || [];
+  const hookPositions = [-0.6, 0, 0.6];
 
   return (
     <group
@@ -253,20 +318,66 @@ function ThreeWayRack({ fixture, selectedId, setSelectedId }) {
         setSelectedId(fixture.id);
       }}
     >
-     {/* base */}
-  <mesh position={[0, 0.05, 0]}>
-    <boxGeometry args={[2.4, 0.1, 0.45]} />
-    <meshStandardMaterial color={selected ? "#2563eb" : "#cfcfcf"} />
-  </mesh>
+      {/* base */}
+      <mesh position={[0, 0.05, 0]}>
+        <boxGeometry args={[2.4, 0.1, 0.6]} />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#cfcfcf"} />
+      </mesh>
 
-      {/* legs */}
-      <mesh position={[-1.35, 0.75, 0]}>
+      {/* two legs */}
+      <mesh position={[-0.9, 0.75, 0]}>
         <cylinderGeometry args={[0.04, 0.04, 1.4]} />
         <meshStandardMaterial color="#777" />
-        </mesh>
-        </group>
+      </mesh>
+
+      <mesh position={[0.9, 0.75, 0]}>
+        <cylinderGeometry args={[0.04, 0.04, 1.4]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
+      {/* main horizontal bar */}
+      <mesh position={[0, 1.45, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.04, 0.04, 2.0]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
+      {/* 3 hooks on the front and 3 hooks on the back */}
+      {hookPositions.map((x, i) => (
+        <React.Fragment key={x}>
+          <mesh position={[x, 1.45, 0.35]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.025, 0.025, 0.7]} />
+            <meshStandardMaterial color="#777" />
+          </mesh>
+
+          <mesh position={[x, 1.45, -0.35]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.025, 0.025, 0.7]} />
+            <meshStandardMaterial color="#777" />
+          </mesh>
+
+          <ProductCard
+            productId={products[i]}
+            productCatalog={productCatalog}
+            x={x}
+            y={1.1}
+            z={0.7}
+            scale={0.75}
+          />
+
+          <ProductCard
+            productId={products[i + 3]}
+            productCatalog={productCatalog}
+            x={x}
+            y={1.1}
+            z={-0.7}
+            scale={0.75}
+            rotation={[0, Math.PI, 0]}
+          />
+        </React.Fragment>
+      ))}
+    </group>
   );
 }
+
 const startingFixtures = [
   {
     id: "Rack 1",
@@ -373,6 +484,21 @@ const startingFixtures = [
     ],
   },
   {
+    id: "Family Tee Rack",
+    type: "threeWay",
+    x: -2.2,
+    z: -3.7,
+    rotation: 0.45,
+    products: [
+      "brotherTee",
+      "sisterTee",
+      "grandmaTee",
+      "grandpaTee",
+      "momTee",
+      "dadTee",
+    ],
+  },
+  {
     id: "Table 1",
     type: "table",
     x: -6.1,
@@ -398,34 +524,42 @@ const startingFixtures = [
       "proWeaveCrewOxford",
     ],
   },
-{
-  id: "3-Way Rack 1",
-  type: "threeWay",
-  x: 0,
-  z: .8,
-  rotation: 0,
-  products: [
-    "crestHoodCrimson",
-    "crestHoodOxford",
-    "crestHoodNavy",
-    ],
-  },
 ];
+
 export default function App() {
   const [fixtures, setFixtures] = useState(startingFixtures);
-
-useEffect(() => {
-  const savedLayout = window.localStorage.getItem("storeLayout");
-
-  if (savedLayout) {
-    setFixtures(JSON.parse(savedLayout));
-  }
-}, []);
-
-useEffect(() => {
-  window.localStorage.setItem("storeLayout", JSON.stringify(fixtures));
-}, [fixtures]);
   const [selectedId, setSelectedId] = useState("Rack 1");
+  const [customProducts, setCustomProducts] = useState({});
+  const [newRackType, setNewRackType] = useState("fourWay");
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductImage, setNewProductImage] = useState("");
+
+  const productCatalog = { ...catalog, ...customProducts };
+  const productOptions = Object.entries(productCatalog).map(([id, product]) => ({
+    id,
+    name: product.name || id,
+  }));
+
+  useEffect(() => {
+    const savedLayout = window.localStorage.getItem("storeLayout");
+    const savedProducts = window.localStorage.getItem("storeProducts");
+
+    if (savedLayout) {
+      setFixtures(JSON.parse(savedLayout));
+    }
+
+    if (savedProducts) {
+      setCustomProducts(JSON.parse(savedProducts));
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("storeLayout", JSON.stringify(fixtures));
+  }, [fixtures]);
+
+  useEffect(() => {
+    window.localStorage.setItem("storeProducts", JSON.stringify(customProducts));
+  }, [customProducts]);
 
   const selectedFixture = fixtures.find((f) => f.id === selectedId);
 
@@ -445,11 +579,78 @@ useEffect(() => {
     );
   }
 
+  function addRack() {
+    const countOfType = fixtures.filter((f) => f.type === newRackType).length + 1;
+    const newFixture = {
+      id: `${rackTypes[newRackType].label} ${countOfType}`,
+      type: newRackType,
+      x: 0,
+      z: 0,
+      rotation: 0,
+      products: makeEmptyProducts(newRackType),
+    };
+
+    setFixtures((current) => [...current, newFixture]);
+    setSelectedId(newFixture.id);
+  }
+
+  function addProduct() {
+    const trimmedName = newProductName.trim();
+    const trimmedImage = newProductImage.trim();
+
+    if (!trimmedName || !trimmedImage) {
+      alert("Add a product name and image link first.");
+      return;
+    }
+
+    const id = trimmedName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") + `-${Date.now()}`;
+
+    setCustomProducts((current) => ({
+      ...current,
+      [id]: { name: trimmedName, image: trimmedImage },
+    }));
+
+    setNewProductName("");
+    setNewProductImage("");
+  }
+
+  function assignProductToSlot(slotIndex, productId) {
+    setFixtures((current) =>
+      current.map((fixture) => {
+        if (fixture.id !== selectedId) return fixture;
+
+        const slotCount = getSlotCount(fixture.type);
+        const nextProducts = [...(fixture.products || makeEmptyProducts(fixture.type))];
+
+        while (nextProducts.length < slotCount) {
+          nextProducts.push(null);
+        }
+
+        nextProducts[slotIndex] = productId || null;
+
+        return {
+          ...fixture,
+          products: nextProducts.slice(0, slotCount),
+        };
+      })
+    );
+  }
+
+  function deleteSelectedFixture() {
+    if (!selectedFixture) return;
+
+    setFixtures((current) => current.filter((f) => f.id !== selectedId));
+    setSelectedId(fixtures.find((f) => f.id !== selectedId)?.id || "");
+  }
+
   function resetLayout() {
-  localStorage.removeItem("storeLayout");
-  setFixtures(startingFixtures);
-  setSelectedId("Rack 1");
-}
+    localStorage.removeItem("storeLayout");
+    setFixtures(startingFixtures);
+    setSelectedId("Rack 1");
+  }
 
   const buttonStyle = {
     padding: "10px",
@@ -472,7 +673,9 @@ useEffect(() => {
           padding: 16,
           borderRadius: 16,
           boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-          width: 280,
+          width: 320,
+          maxHeight: "calc(100vh - 32px)",
+          overflowY: "auto",
           fontFamily: "Arial",
         }}
       >
@@ -498,8 +701,7 @@ useEffect(() => {
         <div style={{ fontSize: 13, marginBottom: 10 }}>
           <b>Selected:</b> {selectedFixture?.id}
           <br />
-          x: {selectedFixture?.x.toFixed(1)} | z:{" "}
-          {selectedFixture?.z.toFixed(1)} | rot:{" "}
+          x: {selectedFixture?.x.toFixed(1)} | z: {selectedFixture?.z.toFixed(1)} | rot:{" "}
           {selectedFixture?.rotation.toFixed(2)}
         </div>
 
@@ -540,16 +742,87 @@ useEffect(() => {
         <button style={{ ...buttonStyle, width: "100%" }} onClick={resetLayout}>
           Reset Layout
         </button>
-      </div>
+
         <button
           style={{ ...buttonStyle, width: "100%", marginTop: 10 }}
           onClick={() => {
             window.localStorage.setItem("storeLayout", JSON.stringify(fixtures));
+            window.localStorage.setItem("storeProducts", JSON.stringify(customProducts));
             alert("Layout saved!");
           }}
         >
           Save Layout
         </button>
+
+        <hr style={{ margin: "14px 0", border: "none", borderTop: "1px solid #ddd" }} />
+
+        <h3 style={{ margin: "0 0 8px" }}>Add Rack</h3>
+        <select
+          value={newRackType}
+          onChange={(e) => setNewRackType(e.target.value)}
+          style={{ width: "100%", padding: 10, borderRadius: 10, marginBottom: 8 }}
+        >
+          {Object.entries(rackTypes).map(([type, rack]) => (
+            <option key={type} value={type}>
+              {rack.label}
+            </option>
+          ))}
+        </select>
+        <button style={{ ...buttonStyle, width: "100%" }} onClick={addRack}>
+          Add Selected Rack
+        </button>
+
+        <hr style={{ margin: "14px 0", border: "none", borderTop: "1px solid #ddd" }} />
+
+        <h3 style={{ margin: "0 0 8px" }}>Add Product</h3>
+        <input
+          value={newProductName}
+          onChange={(e) => setNewProductName(e.target.value)}
+          placeholder="Product name"
+          style={{ width: "100%", padding: 10, borderRadius: 10, marginBottom: 8, border: "1px solid #ccc" }}
+        />
+        <input
+          value={newProductImage}
+          onChange={(e) => setNewProductImage(e.target.value)}
+          placeholder="Product image link"
+          style={{ width: "100%", padding: 10, borderRadius: 10, marginBottom: 8, border: "1px solid #ccc" }}
+        />
+        <button style={{ ...buttonStyle, width: "100%" }} onClick={addProduct}>
+          Add Product
+        </button>
+
+        {selectedFixture && (
+          <>
+            <hr style={{ margin: "14px 0", border: "none", borderTop: "1px solid #ddd" }} />
+
+            <h3 style={{ margin: "0 0 8px" }}>Products on Selected Rack</h3>
+            {Array.from({ length: getSlotCount(selectedFixture.type) }).map((_, slotIndex) => (
+              <select
+                key={slotIndex}
+                value={selectedFixture.products?.[slotIndex] || ""}
+                onChange={(e) => assignProductToSlot(slotIndex, e.target.value)}
+                style={{ width: "100%", padding: 8, borderRadius: 8, marginBottom: 6 }}
+              >
+                <option value="">Slot {slotIndex + 1}: Empty</option>
+                {productOptions.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    Slot {slotIndex + 1}: {product.name}
+                  </option>
+                ))}
+              </select>
+            ))}
+
+            <button
+              style={{ ...buttonStyle, width: "100%", marginTop: 8 }}
+              onClick={deleteSelectedFixture}
+            >
+              Delete Selected Rack
+            </button>
+          </>
+        )}
+
+      </div>
+
       <Canvas camera={{ position: [18, 18, 18], fov: 55 }} shadows>
         <ambientLight intensity={0.6} />
         <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
@@ -576,6 +849,7 @@ useEffect(() => {
                 fixture={fixture}
                 selectedId={selectedId}
                 setSelectedId={setSelectedId}
+                productCatalog={productCatalog}
               />
             );
           }
@@ -587,9 +861,11 @@ useEffect(() => {
                 fixture={fixture}
                 selectedId={selectedId}
                 setSelectedId={setSelectedId}
+                productCatalog={productCatalog}
               />
             );
           }
+
           if (fixture.type === "threeWay") {
             return (
               <ThreeWayRack
@@ -597,9 +873,11 @@ useEffect(() => {
                 fixture={fixture}
                 selectedId={selectedId}
                 setSelectedId={setSelectedId}
+                productCatalog={productCatalog}
               />
             );
           }
+
           if (fixture.type === "table") {
             return (
               <DisplayTable
@@ -607,6 +885,7 @@ useEffect(() => {
                 fixture={fixture}
                 selectedId={selectedId}
                 setSelectedId={setSelectedId}
+                productCatalog={productCatalog}
               />
             );
           }
@@ -619,33 +898,36 @@ useEffect(() => {
           z={-7.25}
           rotation={0}
           product="harvardArcTeeCrimson"
+          productCatalog={productCatalog}
         />
         <WallHookRack
           x={-5.7}
           z={-7.25}
           rotation={0}
           product="harvardArcTeeOxford"
+          productCatalog={productCatalog}
         />
         <WallHookRack
           x={-4.3}
           z={-7.25}
           rotation={0}
           product="harvardArcTeeBlack"
+          productCatalog={productCatalog}
         />
         <WallHookRack
           x={-3.0}
           z={-7.25}
           rotation={0}
           product="harvardArcTeeWhite"
+          productCatalog={productCatalog}
         />
         <WallHookRack
           x={-1.7}
           z={-7.25}
           rotation={0}
           product="crestTeeOxford"
+          productCatalog={productCatalog}
         />
-
-       
       </Canvas>
     </div>
   );
