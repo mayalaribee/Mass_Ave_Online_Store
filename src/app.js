@@ -187,6 +187,7 @@ const rackTypes = {
   threeWay: { label: "Family / Six-Hook Rack", slots: 6 },
   table: { label: "Display Table", slots: 4 },
   wallHook: { label: "Wall Hook Rack", slots: 2 },
+  desk: { label: "POS Desk", slots: 3 },
 };
 
 function getSlotCount(type) {
@@ -281,7 +282,58 @@ function FourWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
     </group>
   );
 }
+function POSDesk({ fixture, selectedId, setSelectedId }) {
+  const selected = selectedId === fixture.id;
 
+  return (
+    <group
+      position={[fixture.x, 0, fixture.z]}
+      rotation={[0, fixture.rotation, 0]}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedId(fixture.id);
+      }}
+    >
+      {/* long wood counter */}
+      <mesh position={[0, 0.55, 0]}>
+        <boxGeometry args={[3.8, 1.1, 0.85]} />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#c49a6c"} />
+      </mesh>
+
+      {/* dark countertop */}
+      <mesh position={[0, 1.13, 0]}>
+        <boxGeometry args={[3.95, 0.08, 0.95]} />
+        <meshStandardMaterial color="#3b3b3b" />
+      </mesh>
+
+      {/* crimson front panel */}
+      <mesh position={[0, 0.72, 0.46]}>
+        <boxGeometry args={[1.25, 0.75, 0.06]} />
+        <meshStandardMaterial color="#8c1d40" />
+      </mesh>
+
+      {/* left register */}
+      <mesh position={[-1.15, 1.32, 0.05]}>
+        <boxGeometry args={[0.45, 0.35, 0.08]} />
+        <meshStandardMaterial color="#eeeeee" />
+      </mesh>
+      <mesh position={[-1.15, 1.52, -0.08]}>
+        <boxGeometry args={[0.5, 0.32, 0.06]} />
+        <meshStandardMaterial color="#dddddd" />
+      </mesh>
+
+      {/* right register */}
+      <mesh position={[1.15, 1.32, 0.05]}>
+        <boxGeometry args={[0.45, 0.35, 0.08]} />
+        <meshStandardMaterial color="#eeeeee" />
+      </mesh>
+      <mesh position={[1.15, 1.52, -0.08]}>
+        <boxGeometry args={[0.5, 0.32, 0.06]} />
+        <meshStandardMaterial color="#dddddd" />
+      </mesh>
+    </group>
+  );
+}
 function DisplayTable({ fixture, selectedId, setSelectedId, productCatalog }) {
   const selected = selectedId === fixture.id;
 
@@ -1227,6 +1279,16 @@ export default function App() {
                 selectedId={selectedId}
                 setSelectedId={setSelectedId}
                 productCatalog={productCatalog}
+              />
+            );
+          }
+          if (fixture.type === "desk") {
+            return (
+              <POSDesk
+                key={fixture.id}
+                fixture={fixture}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
               />
             );
           }
