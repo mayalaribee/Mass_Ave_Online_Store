@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import { TextureLoader } from "three";
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
+import { OrbitControls, PointerLockControls } from "@react-three/drei";
+import { TextureLoader, Vector3 } from "three";
 
 const catalog = {
   harvardArcTeeCrimson: {
@@ -147,37 +147,52 @@ function WindowSegment({ start, end, height = 3.2 }) {
   );
 }
 function DoubleDoor({ x, z, rotation = 0 }) {
+  const [open, setOpen] = useState(false);
+  const leftRotation = open ? Math.PI / 2.4 : 0;
+  const rightRotation = open ? -Math.PI / 2.4 : 0;
+
   return (
-    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
-      <mesh position={[-0.45, 1.15, 0]}>
-        <boxGeometry args={[0.85, 2.3, 0.08]} />
-        <meshStandardMaterial color="#111" />
-      </mesh>
+    <group
+      position={[x, 0, z]}
+      rotation={[0, rotation, 0]}
+      onClick={(event) => {
+        event.stopPropagation();
+        setOpen((current) => !current);
+      }}
+    >
+      <group position={[-0.45, 0, 0]} rotation={[0, leftRotation, 0]}>
+        <mesh position={[0, 1.15, 0]}>
+          <boxGeometry args={[0.85, 2.3, 0.08]} />
+          <meshStandardMaterial color="#111" />
+        </mesh>
 
-      <mesh position={[0.45, 1.15, 0]}>
-        <boxGeometry args={[0.85, 2.3, 0.08]} />
-        <meshStandardMaterial color="#111" />
-      </mesh>
+        <mesh position={[0, 1.15, 0.04]}>
+          <boxGeometry args={[0.72, 1.9, 0.04]} />
+          <meshStandardMaterial color="#bfe7ff" transparent opacity={0.45} />
+        </mesh>
 
-      <mesh position={[-0.45, 1.15, 0.04]}>
-        <boxGeometry args={[0.72, 1.9, 0.04]} />
-        <meshStandardMaterial color="#bfe7ff" transparent opacity={0.45} />
-      </mesh>
+        <mesh position={[0.34, 1.05, 0.12]}>
+          <sphereGeometry args={[0.05, 16, 16]} />
+          <meshStandardMaterial color="#c8a24a" />
+        </mesh>
+      </group>
 
-      <mesh position={[0.45, 1.15, 0.04]}>
-        <boxGeometry args={[0.72, 1.9, 0.04]} />
-        <meshStandardMaterial color="#bfe7ff" transparent opacity={0.45} />
-      </mesh>
+      <group position={[0.45, 0, 0]} rotation={[0, rightRotation, 0]}>
+        <mesh position={[0, 1.15, 0]}>
+          <boxGeometry args={[0.85, 2.3, 0.08]} />
+          <meshStandardMaterial color="#111" />
+        </mesh>
 
-      <mesh position={[-0.1, 1.05, 0.12]}>
-        <sphereGeometry args={[0.05, 16, 16]} />
-        <meshStandardMaterial color="#c8a24a" />
-      </mesh>
+        <mesh position={[0, 1.15, 0.04]}>
+          <boxGeometry args={[0.72, 1.9, 0.04]} />
+          <meshStandardMaterial color="#bfe7ff" transparent opacity={0.45} />
+        </mesh>
 
-      <mesh position={[0.1, 1.05, 0.12]}>
-        <sphereGeometry args={[0.05, 16, 16]} />
-        <meshStandardMaterial color="#c8a24a" />
-      </mesh>
+        <mesh position={[-0.34, 1.05, 0.12]}>
+          <sphereGeometry args={[0.05, 16, 16]} />
+          <meshStandardMaterial color="#c8a24a" />
+        </mesh>
+      </group>
     </group>
   );
 }
@@ -808,6 +823,70 @@ function WoodFloor({ size = [22, 20] }) {
     </mesh>
   );
 }
+function FirstPersonWalkControls({ enabled, startPosition = [0, 1.6, 6] }) {
+  const { camera } = useThree();
+  const [keys, setKeys] = useState({});
+  const direction = new Vector3();
+  const sideDirection = new Vector3();
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    camera.position.set(startPosition[0], startPosition[1], startPosition[2]);
+
+    function handleKeyDown(event) {
+      setKeys((current) => ({ ...current, [event.code]: true }));
+    }
+
+    function handleKeyUp(event) {
+      setKeys((current) => ({ ...current, [event.code]: false }));
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [enabled, camera, startPosition]);
+
+  useFrame((_, delta) => {
+    if (!enabled) return;
+
+    const speed = keys.ShiftLeft || keys.ShiftRight ? 5 : 2.4;
+
+    camera.getWorldDirection(direction);
+    direction.y = 0;
+    direction.normalize();
+
+    sideDirection.crossVectors(camera.up, direction).normalize();
+
+    if (keys.KeyW) camera.position.addScaledVector(direction, speed * delta);
+    if (keys.KeyS) camera.position.addScaledVector(direction, -speed * delta);
+    if (keys.KeyA) camera.position.addScaledVector(sideDirection, speed * delta);
+    if (keys.KeyD) camera.position.addScaledVector(sideDirection, -speed * delta);
+
+    camera.position.y = startPosition[1];
+  });
+
+  return null;
+}
+
+function WalkableFloor({ size, onDropIn }) {
+  return (
+    <mesh
+      rotation={[-Math.PI / 2, 0, 0]}
+      onDoubleClick={(event) => {
+        event.stopPropagation();
+        onDropIn([event.point.x, 1.6, event.point.z]);
+      }}
+    >
+      <planeGeometry args={size} />
+      <meshStandardMaterial transparent opacity={0} />
+    </mesh>
+  );
+}
 export default function App() {
   const [activeStoreId, setActiveStoreId] = useState("massAve");
   const [fixtures, setFixtures] = useState(() => getDefaultFixturesForStore("massAve"));
@@ -816,6 +895,8 @@ export default function App() {
   const [newRackType, setNewRackType] = useState("fourWay");
   const [newProductName, setNewProductName] = useState("");
   const [newProductImage, setNewProductImage] = useState("");
+  const [walkMode, setWalkMode] = useState(false);
+  const [walkStartPosition, setWalkStartPosition] = useState([0, 1.6, 6]);
 
   const productCatalog = { ...catalog, ...customProducts };
   const productOptions = Object.entries(productCatalog).map(([id, product]) => ({
@@ -1202,13 +1283,74 @@ export default function App() {
 
       </div>
 
-     <Canvas camera={{ position: [18, 18, 18], fov: 55 }} shadows>
-  <ambientLight intensity={0.6} />
-  <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
+      <button
+        onClick={() => {
+          setWalkStartPosition([0, 1.6, 6]);
+          setWalkMode((current) => !current);
+        }}
+        style={{
+          position: "absolute",
+          right: 24,
+          bottom: 24,
+          zIndex: 30,
+          padding: "12px 16px",
+          borderRadius: 999,
+          border: "1px solid #d8d3cc",
+          background: walkMode ? "#7f1d1d" : "white",
+          color: walkMode ? "white" : "#3b2f2f",
+          fontWeight: 900,
+          cursor: "pointer",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.16)",
+        }}
+      >
+        {walkMode ? "Exit Walk Mode" : "Enter Walk Mode"}
+      </button>
 
-  <OrbitControls enablePan enableZoom enableRotate />
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          bottom: 24,
+          transform: "translateX(-50%)",
+          zIndex: 30,
+          padding: "10px 14px",
+          borderRadius: 999,
+          background: "rgba(36, 21, 21, 0.86)",
+          color: "white",
+          fontSize: 13,
+          fontWeight: 700,
+          pointerEvents: "none",
+        }}
+      >
+        {walkMode
+          ? "WASD to walk - Mouse to look - Shift to run - Esc or button to exit"
+          : "Double-click the floor to drop into the store - Drag to orbit"}
+      </div>
 
-      <WoodFloor size={activeFloorSize} />
+      <Canvas camera={{ position: [18, 18, 18], fov: 55 }} shadows>
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
+
+        {walkMode ? (
+          <>
+            <PointerLockControls />
+            <FirstPersonWalkControls
+              enabled={walkMode}
+              startPosition={walkStartPosition}
+            />
+          </>
+        ) : (
+          <OrbitControls enablePan enableZoom enableRotate />
+        )}
+
+        <WoodFloor size={activeFloorSize} />
+        <WalkableFloor
+          size={activeFloorSize}
+          onDropIn={(position) => {
+            setWalkStartPosition(position);
+            setWalkMode(true);
+          }}
+        />
 
         {activeWalls.map(([start, end], index) => (
       <WallSegment key={`${activeStoreId}-wall-${index}`} start={start} end={end} />
