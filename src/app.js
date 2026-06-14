@@ -1156,8 +1156,6 @@ export default function App() {
 
   <OrbitControls enablePan enableZoom enableRotate />
 
-  <WoodFloor size={activeFloorSize} />
-
       <WoodFloor size={activeFloorSize} />
 
         {activeWalls.map(([start, end], index) => (
@@ -1221,7 +1219,17 @@ export default function App() {
               />
             );
           }
-
+          if (fixture.type === "table") {
+            return (
+              <DisplayTable
+                key={fixture.id}
+                fixture={fixture}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+                productCatalog={productCatalog}
+              />
+            );
+          }
           return null;
         })}
 
