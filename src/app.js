@@ -1165,54 +1165,50 @@ function FourWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
     </group>
   );
 }
-function POSDesk({ fixture, selectedId, setSelectedId }) {
-  const selected = selectedId === fixture.id;
+function POSDesk({
+  fixture,
+  selectedId,
+  setSelectedId,
+}) {
+  const selected =
+    selectedId === fixture.id;
 
   return (
     <group
-      position={[fixture.x, 0, fixture.z]}
-      rotation={[0, fixture.rotation, 0]}
+      position={[
+        fixture.x,
+        0,
+        fixture.z,
+      ]}
+      rotation={[
+        0,
+        fixture.rotation,
+        0,
+      ]}
       onClick={(e) => {
         e.stopPropagation();
         setSelectedId(fixture.id);
       }}
     >
-      {/* long wood counter */}
       <mesh position={[0, 0.55, 0]}>
-        <boxGeometry args={[3.8, 1.1, 0.85]} />
-        <meshStandardMaterial color={selected ? "#2563eb" : "#c49a6c"} />
+        <boxGeometry args={[5.2, 1.1, 1.2]} />
+        <meshStandardMaterial
+          color={
+            selected
+              ? "#2563eb"
+              : "#d9b382"
+          }
+        />
       </mesh>
 
-      {/* dark countertop */}
       <mesh position={[0, 1.13, 0]}>
-        <boxGeometry args={[3.95, 0.08, 0.95]} />
-        <meshStandardMaterial color="#3b3b3b" />
+        <boxGeometry args={[5.3, 0.08, 1.25]} />
+        <meshStandardMaterial color="#333" />
       </mesh>
 
-      {/* crimson front panel */}
-      <mesh position={[0, 0.72, 0.46]}>
-        <boxGeometry args={[1.25, 0.75, 0.06]} />
+      <mesh position={[0, 0.7, 0.63]}>
+        <boxGeometry args={[1.8, 0.9, 0.08]} />
         <meshStandardMaterial color="#8c1d40" />
-      </mesh>
-
-      {/* left register */}
-      <mesh position={[-1.15, 1.32, 0.05]}>
-        <boxGeometry args={[0.45, 0.35, 0.08]} />
-        <meshStandardMaterial color="#eeeeee" />
-      </mesh>
-      <mesh position={[-1.15, 1.52, -0.08]}>
-        <boxGeometry args={[0.5, 0.32, 0.06]} />
-        <meshStandardMaterial color="#dddddd" />
-      </mesh>
-
-      {/* right register */}
-      <mesh position={[1.15, 1.32, 0.05]}>
-        <boxGeometry args={[0.45, 0.35, 0.08]} />
-        <meshStandardMaterial color="#eeeeee" />
-      </mesh>
-      <mesh position={[1.15, 1.52, -0.08]}>
-        <boxGeometry args={[0.5, 0.32, 0.06]} />
-        <meshStandardMaterial color="#dddddd" />
       </mesh>
     </group>
   );
@@ -1549,6 +1545,14 @@ const startingFixtures = [
     ],
   },
   {
+    {
+  id: "Checkout Desk",
+  type: "desk",
+  x: -6.5,
+  z: 0,
+  rotation: Math.PI / 2,
+  products: [],
+},
     id: "Table 1",
     type: "table",
     x: -6.1,
@@ -1832,20 +1836,35 @@ function canWalkTo(x, z, walls, fixtures, floorSize) {
 }
 
 
-function WoodSlatWall({ x, z, rotation = 0, width = 5.5, height = 2.5 }) {
-  const slats = Array.from({ length: Math.floor(width / 0.28) });
+function WoodSlatWall({
+  x,
+  z,
+  rotation = 0,
+  width = 6,
+  height = 2.8,
+}) {
+  const rows = Array.from({
+    length: Math.floor(height / 0.22),
+  });
 
   return (
     <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
       <mesh position={[0, height / 2, 0]}>
         <boxGeometry args={[width, height, 0.08]} />
-        <meshStandardMaterial color="#d9b382" />
+        <meshStandardMaterial color="#b98a58" />
       </mesh>
 
-      {slats.map((_, i) => (
-        <mesh key={i} position={[-width / 2 + i * 0.28, height / 2, 0.06]}>
-          <boxGeometry args={[0.035, height, 0.05]} />
-          <meshStandardMaterial color="#b88755" />
+      {rows.map((_, i) => (
+        <mesh
+          key={i}
+          position={[
+            0,
+            i * 0.22 + 0.1,
+            0.05,
+          ]}
+        >
+          <boxGeometry args={[width, 0.02, 0.03]} />
+          <meshStandardMaterial color="#8a5a2c" />
         </mesh>
       ))}
     </group>
@@ -1965,22 +1984,88 @@ function CeilingPipesAndLights({ size = [22, 20] }) {
   );
 }
 
-function StoreAtmosphere({ storeId, floorSize }) {
+function StoreAtmosphere({
+  storeId,
+  floorSize,
+}) {
+  if (storeId !== "massAve") return null;
+
   return (
     <group>
-      <CeilingPipesAndLights size={floorSize} />
+      {/* GREEN WALL */}
+      <WoodSlatWall
+        x={0}
+        z={-7.3}
+        width={13}
+      />
 
-      {storeId === "massAve" && (
-        <>
-          <WoodSlatWall x={-3.5} z={-7.35} rotation={0} width={7.5} />
-          <MapMuralWall x={2.2} z={-7.36} rotation={0} width={6.5} />
-          <RedHSign x={7.95} z={2.0} rotation={-Math.PI / 2.8} />
-          <mesh position={[0, 3.35, -7.15]}>
-            <boxGeometry args={[17, 0.18, 0.18]} />
-            <meshStandardMaterial color="#a51c30" />
+      {/* CYAN WALL */}
+      <WoodSlatWall
+        x={6.8}
+        z={-2.3}
+        rotation={-0.62}
+        width={7}
+      />
+
+      {/* PURPLE RIGHT */}
+      <WoodSlatWall
+        x={8.0}
+        z={3.5}
+        rotation={-1.2}
+        width={3.5}
+      />
+
+      {/* PURPLE LEFT MAP WALL */}
+      <MapMuralWall
+        x={-8.3}
+        z={0}
+        rotation={Math.PI / 2}
+        width={8}
+      />
+
+      {/* GOLD FEATURE WALL */}
+      <group position={[8.2, 5.8, 0]}>
+        {/* greenery */}
+        <mesh position={[0, 1.4, 0]}>
+          <boxGeometry args={[2.2, 2.8, 0.08]} />
+          <meshStandardMaterial color="#1d5b37" />
+        </mesh>
+
+        {/* red panel */}
+        <mesh position={[0, 1.4, 0.09]}>
+          <boxGeometry args={[1.6, 2.3, 0.04]} />
+          <meshStandardMaterial color="#a51c30" />
+        </mesh>
+
+        {/* lower shelves only */}
+        {[0.3, 0.9, 1.5].map((y) => (
+          <mesh
+            key={y}
+            position={[-0.65, y, 0.25]}
+          >
+            <boxGeometry args={[1.1, 0.08, 0.4]} />
+            <meshStandardMaterial color="#d9b382" />
           </mesh>
-        </>
-      )}
+        ))}
+
+        {/* apparel fixture side */}
+        <mesh
+          position={[0.55, 1.6, 0.3]}
+          rotation={[0, 0, Math.PI / 2]}
+        >
+          <cylinderGeometry
+            args={[0.03, 0.03, 2.1]}
+          />
+          <meshStandardMaterial color="#888" />
+        </mesh>
+      </group>
+
+      {/* RED H */}
+      <RedHSign
+        x={7.9}
+        z={5.2}
+        rotation={-1.2}
+      />
     </group>
   );
 }
