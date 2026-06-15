@@ -1684,11 +1684,27 @@ function getDefaultFixturesForStore(storeId) {
   return cloneFixtures(startingFixturesByStore[storeId] || []);
 }
 function WoodFloor({ size = [22, 20] }) {
+  const [width, depth] = size;
+  const boardCount = Math.floor(width / 0.38);
+
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]}>
-      <planeGeometry args={size} />
-      <meshStandardMaterial color="#a8753b" roughness={0.65} />
-    </mesh>
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={size} />
+        <meshStandardMaterial color="#b98243" roughness={0.75} />
+      </mesh>
+
+      {Array.from({ length: boardCount }).map((_, i) => (
+        <mesh
+          key={i}
+          position={[-width / 2 + i * 0.38, 0.006, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
+          <planeGeometry args={[0.018, depth]} />
+          <meshStandardMaterial color={i % 2 === 0 ? "#8f5f2f" : "#c08a4b"} roughness={0.8} />
+        </mesh>
+      ))}
+    </group>
   );
 }
 function FirstPersonWalkControls({ enabled, startPosition = [0, 1.6, 6], walls = [], fixtures = [], floorSize = [22, 20] }) {
@@ -1813,6 +1829,160 @@ function canWalkTo(x, z, walls, fixtures, floorSize) {
   const hitsFixture = fixtures.some((fixture) => isInsideFixture(x, z, fixture));
 
   return !hitsFixture;
+}
+
+
+function WoodSlatWall({ x, z, rotation = 0, width = 5.5, height = 2.5 }) {
+  const slats = Array.from({ length: Math.floor(width / 0.28) });
+
+  return (
+    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+      <mesh position={[0, height / 2, 0]}>
+        <boxGeometry args={[width, height, 0.08]} />
+        <meshStandardMaterial color="#d9b382" />
+      </mesh>
+
+      {slats.map((_, i) => (
+        <mesh key={i} position={[-width / 2 + i * 0.28, height / 2, 0.06]}>
+          <boxGeometry args={[0.035, height, 0.05]} />
+          <meshStandardMaterial color="#b88755" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function MapMuralWall({ x, z, rotation = 0, width = 6.5, height = 2.6 }) {
+  const blocks = [
+    [-2.4, 0.6, 0.55, 0.28],
+    [-1.6, 1.0, 0.42, 0.22],
+    [-0.8, 0.45, 0.72, 0.26],
+    [0.15, 1.2, 0.55, 0.25],
+    [0.9, 0.75, 0.7, 0.3],
+    [1.75, 1.35, 0.38, 0.28],
+    [2.35, 0.5, 0.48, 0.26],
+    [-2.05, -0.55, 0.62, 0.24],
+    [-1.05, -0.95, 0.45, 0.22],
+    [0.15, -0.45, 0.8, 0.28],
+    [1.25, -0.85, 0.52, 0.22],
+    [2.1, -0.35, 0.62, 0.24],
+  ];
+
+  return (
+    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+      <mesh position={[0, height / 2, 0]}>
+        <boxGeometry args={[width, height, 0.07]} />
+        <meshStandardMaterial color="#e8e3dc" />
+      </mesh>
+
+      {Array.from({ length: 14 }).map((_, i) => (
+        <mesh key={`road-x-${i}`} position={[-width / 2 + i * 0.5, height / 2, 0.055]} rotation={[0, 0, 0.55]}>
+          <boxGeometry args={[0.035, height * 1.25, 0.03]} />
+          <meshStandardMaterial color="#b9b1aa" />
+        </mesh>
+      ))}
+
+      {Array.from({ length: 8 }).map((_, i) => (
+        <mesh key={`road-y-${i}`} position={[0, 0.35 + i * 0.27, 0.06]} rotation={[0, 0, -0.95]}>
+          <boxGeometry args={[width * 0.9, 0.035, 0.03]} />
+          <meshStandardMaterial color="#b9b1aa" />
+        </mesh>
+      ))}
+
+      {blocks.map(([bx, by, bw, bh], i) => (
+        <mesh key={i} position={[bx, height / 2 + by * 0.45, 0.08]}>
+          <boxGeometry args={[bw, bh, 0.04]} />
+          <meshStandardMaterial color="#c92f3f" />
+        </mesh>
+      ))}
+
+      <group position={[1.55, 1.85, 0.12]}>
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[2.3, 0.08, 0.04]} />
+          <meshStandardMaterial color="white" />
+        </mesh>
+        <mesh position={[0, -0.78, 0]}>
+          <boxGeometry args={[2.3, 0.08, 0.04]} />
+          <meshStandardMaterial color="white" />
+        </mesh>
+        <mesh position={[-1.15, -0.39, 0]}>
+          <boxGeometry args={[0.08, 0.86, 0.04]} />
+          <meshStandardMaterial color="white" />
+        </mesh>
+        <mesh position={[1.15, -0.39, 0]}>
+          <boxGeometry args={[0.08, 0.86, 0.04]} />
+          <meshStandardMaterial color="white" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+function RedHSign({ x, z, rotation = 0 }) {
+  return (
+    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+      <mesh position={[0, 1.6, 0]}>
+        <boxGeometry args={[1.0, 1.5, 0.15]} />
+        <meshStandardMaterial color="#d71920" />
+      </mesh>
+      <mesh position={[0, 1.6, 0.09]}>
+        <boxGeometry args={[0.3, 1.1, 0.05]} />
+        <meshStandardMaterial color="white" />
+      </mesh>
+      <mesh position={[0, 1.6, 0.1]}>
+        <boxGeometry args={[1.05, 0.3, 0.05]} />
+        <meshStandardMaterial color="white" />
+      </mesh>
+    </group>
+  );
+}
+
+function CeilingPipesAndLights({ size = [22, 20] }) {
+  const [w, d] = size;
+  const zLines = [-d / 3, -d / 8, d / 8, d / 3];
+
+  return (
+    <group>
+      {zLines.map((z, i) => (
+        <group key={z}>
+          <mesh position={[0, 3.75, z]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.025, 0.025, w * 0.8, 16]} />
+            <meshStandardMaterial color="#f1f1f1" />
+          </mesh>
+
+          {[-w / 4, 0, w / 4].map((x, j) => (
+            <group key={`${i}-${j}`} position={[x, 3.45, z]}>
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.06, 0.09, 0.22, 16]} />
+                <meshStandardMaterial color="#ffffff" />
+              </mesh>
+              <pointLight intensity={0.25} distance={4} />
+            </group>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function StoreAtmosphere({ storeId, floorSize }) {
+  return (
+    <group>
+      <CeilingPipesAndLights size={floorSize} />
+
+      {storeId === "massAve" && (
+        <>
+          <WoodSlatWall x={-3.5} z={-7.35} rotation={0} width={7.5} />
+          <MapMuralWall x={2.2} z={-7.36} rotation={0} width={6.5} />
+          <RedHSign x={7.95} z={2.0} rotation={-Math.PI / 2.8} />
+          <mesh position={[0, 3.35, -7.15]}>
+            <boxGeometry args={[17, 0.18, 0.18]} />
+            <meshStandardMaterial color="#a51c30" />
+          </mesh>
+        </>
+      )}
+    </group>
+  );
 }
 
 export default function App() {
@@ -2394,6 +2564,7 @@ export default function App() {
         )}
 
         <WoodFloor size={activeFloorSize} />
+        <StoreAtmosphere storeId={activeStoreId} floorSize={activeFloorSize} />
         <WalkableFloor
           size={activeFloorSize}
           onDropIn={(position) => {
