@@ -1767,11 +1767,12 @@ export default function App() {
   const [walkStartPosition, setWalkStartPosition] = useState([0, 1.6, 6]);
 
   const productCatalog = { ...catalog, ...customProducts };
-  const productOptions = Object.entries(productCatalog).map(([id, product]) => ({
+  const productOptions = Object.entries(productCatalog)
+  .map(([id, product]) => ({
     id,
     name: product.name || id,
-  }));
-
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
   useEffect(() => {
     const savedProducts = window.localStorage.getItem("storeProducts");
 
