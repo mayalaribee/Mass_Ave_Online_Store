@@ -1545,14 +1545,14 @@ const startingFixtures = [
     ],
   },
   {
-    {
-  id: "Checkout Desk",
-  type: "desk",
-  x: -6.5,
-  z: 0,
-  rotation: Math.PI / 2,
-  products: [],
-},
+    id: "Checkout Desk",
+    type: "desk",
+    x: -6.5,
+    z: 0,
+    rotation: Math.PI / 2,
+    products: [],
+  },
+  {
     id: "Table 1",
     type: "table",
     x: -6.1,
