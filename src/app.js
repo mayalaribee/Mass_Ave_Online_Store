@@ -1691,7 +1691,7 @@ function WoodFloor({ size = [22, 20] }) {
     </mesh>
   );
 }
-function FirstPersonWalkControls({ enabled, startPosition = [0, 1.6, 6] }) {
+function FirstPersonWalkControls({ enabled, startPosition = [0, 1.6, 6], walls = [], fixtures = [], floorSize = [22, 20] }) {
   const { camera } = useThree();
   const [keys, setKeys] = useState({});
   const direction = new Vector3();
@@ -1755,6 +1755,78 @@ function WalkableFloor({ size, onDropIn }) {
     </mesh>
   );
 }
+
+const WALK_RADIUS = 0.32;
+const FIXTURE_COLLISION_PADDING = 0.35;
+
+const fixtureCollisionSizes = {
+  fourWay: [1.6, 1.6],
+  horizontal: [3.2, 1.0],
+  threeWay: [2.8, 1.4],
+  table: [2.9, 1.6],
+  wallHook: [1.1, 1.0],
+  desk: [4.3, 1.4],
+};
+
+function pointNearSegment(px, pz, start, end, radius) {
+  const [x1, z1] = start;
+  const [x2, z2] = end;
+
+  const dx = x2 - x1;
+  const dz = z2 - z1;
+  const lengthSquared = dx * dx + dz * dz;
+
+  if (lengthSquared === 0) {
+    const distance = Math.hypot(px - x1, pz - z1);
+    return distance < radius;
+  }
+
+  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (pz - z1) * dz) / lengthSquared));
+  const closestX = x1 + t * dx;
+  const closestZ = z1 + t * dz;
+
+  return Math.hypot(px - closestX, pz - closestZ) < radius;
+}
+
+function isInsideFixture(px, pz, fixture) {
+  const [width, depth] = fixtureCollisionSizes[fixture.type] || [1.3, 1.3];
+  const halfWidth = width / 2 + FIXTURE_COLLISION_PADDING;
+  const halfDepth = depth / 2 + FIXTURE_COLLISION_PADDING;
+
+  const dx = px - fixture.x;
+  const dz = pz - fixture.z;
+  const rotation = -(fixture.rotation || 0);
+
+  const localX = dx * Math.cos(rotation) - dz * Math.sin(rotation);
+  const localZ = dx * Math.sin(rotation) + dz * Math.cos(rotation);
+
+  return Math.abs(localX) < halfWidth && Math.abs(localZ) < halfDepth;
+}
+
+function canWalkTo(x, z, walls, fixtures, floorSize) {
+  const [floorWidth, floorDepth] = floorSize;
+  const floorMargin = 0.45;
+
+  if (
+    x < -floorWidth / 2 + floorMargin ||
+    x > floorWidth / 2 - floorMargin ||
+    z < -floorDepth / 2 + floorMargin ||
+    z > floorDepth / 2 - floorMargin
+  ) {
+    return false;
+  }
+
+  const hitsWall = walls.some(([start, end]) =>
+    pointNearSegment(x, z, start, end, WALK_RADIUS)
+  );
+
+  if (hitsWall) return false;
+
+  const hitsFixture = fixtures.some((fixture) => isInsideFixture(x, z, fixture));
+
+  return !hitsFixture;
+}
+
 export default function App() {
   const [activeStoreId, setActiveStoreId] = useState("massAve");
   const [fixtures, setFixtures] = useState(() => getDefaultFixturesForStore("massAve"));
@@ -1763,16 +1835,22 @@ export default function App() {
   const [newRackType, setNewRackType] = useState("fourWay");
   const [newProductName, setNewProductName] = useState("");
   const [newProductImage, setNewProductImage] = useState("");
+  const [productSearch, setProductSearch] = useState("");
   const [walkMode, setWalkMode] = useState(false);
   const [walkStartPosition, setWalkStartPosition] = useState([0, 1.6, 6]);
 
   const productCatalog = { ...catalog, ...customProducts };
   const productOptions = Object.entries(productCatalog)
-  .map(([id, product]) => ({
-    id,
-    name: product.name || id,
-  }))
-  .sort((a, b) => a.name.localeCompare(b.name));
+    .map(([id, product]) => ({
+      id,
+      name: product.name || id,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const filteredProductOptions = productOptions.filter((product) =>
+    product.name.toLowerCase().includes(productSearch.toLowerCase())
+  );
+
   useEffect(() => {
     const savedProducts = window.localStorage.getItem("storeProducts");
 
@@ -2125,6 +2203,12 @@ export default function App() {
             <hr style={{ margin: "14px 0", border: "none", borderTop: "1px solid #ddd" }} />
 
             <h3 style={sectionTitleStyle}>Products on Selected Rack</h3>
+            <input
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder="Search products for this rack..."
+              style={inputStyle}
+            />
             {Array.from({ length: getSlotCount(selectedFixture.type) }).map((_, slotIndex) => (
               <select
                 key={slotIndex}
@@ -2133,7 +2217,7 @@ export default function App() {
                 style={{ ...inputStyle, padding: 8, marginBottom: 6 }}
               >
                 <option value="">Slot {slotIndex + 1}: Empty</option>
-                {productOptions.map((product) => (
+                {filteredProductOptions.map((product) => (
                   <option key={product.id} value={product.id}>
                     Slot {slotIndex + 1}: {product.name}
                   </option>
@@ -2206,6 +2290,9 @@ export default function App() {
             <FirstPersonWalkControls
               enabled={walkMode}
               startPosition={walkStartPosition}
+              walls={activeWalls}
+              fixtures={fixtures}
+              floorSize={activeFloorSize}
             />
           </>
         ) : (
