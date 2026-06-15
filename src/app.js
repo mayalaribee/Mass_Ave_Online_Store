@@ -1070,6 +1070,7 @@ const rackTypes = {
   threeWay: { label: "Family / Six-Hook Rack", slots: 6 },
   table: { label: "Display Table", slots: 4 },
   wallHook: { label: "Wall Hook Rack", slots: 2 },
+  wallRail: { label: "Wall Apparel Rail", slots: 4 },
   desk: { label: "POS Desk", slots: 3 },
 };
 
@@ -1123,6 +1124,99 @@ function WallSegment({ start, end, height = 3.5 }) {
   );
 }
 
+
+function MapWallSegment({ start, end, height = 3.5 }) {
+  const [x1, z1] = start;
+  const [x2, z2] = end;
+
+  const length = Math.sqrt((x2 - x1) ** 2 + (z2 - z1) ** 2);
+  const x = (x1 + x2) / 2;
+  const z = (z1 + z2) / 2;
+  const rotation = -Math.atan2(z2 - z1, x2 - x1);
+
+  const redBlocks = [
+    [-0.38, 0.25, 0.45, 0.22],
+    [-0.22, 0.55, 0.3, 0.18],
+    [0.05, 0.35, 0.5, 0.2],
+    [0.28, 0.62, 0.34, 0.2],
+    [0.42, 0.22, 0.36, 0.22],
+    [-0.12, 0.78, 0.42, 0.18],
+  ];
+
+  return (
+    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+      <mesh position={[0, height / 2, 0]}>
+        <boxGeometry args={[length, height, 0.25]} />
+        <meshStandardMaterial color="#e8e3dc" />
+      </mesh>
+
+      {Array.from({ length: 18 }).map((_, i) => (
+        <mesh
+          key={`road-${i}`}
+          position={[-length / 2 + i * (length / 17), height / 2, 0.15]}
+          rotation={[0, 0, i % 2 === 0 ? 0.55 : -0.8]}
+        >
+          <boxGeometry args={[0.035, height * 1.15, 0.035]} />
+          <meshStandardMaterial color="#b9b1aa" />
+        </mesh>
+      ))}
+
+      {redBlocks.map(([px, py, bw, bh], i) => (
+        <mesh key={i} position={[px * length, py * height, 0.18]}>
+          <boxGeometry args={[bw, bh, 0.04]} />
+          <meshStandardMaterial color="#c92f3f" />
+        </mesh>
+      ))}
+
+      <group position={[length * 0.12, height * 0.58, 0.22]}>
+        <mesh position={[0, 0.35, 0]}>
+          <boxGeometry args={[2.2, 0.06, 0.04]} />
+          <meshStandardMaterial color="white" />
+        </mesh>
+        <mesh position={[0, -0.35, 0]}>
+          <boxGeometry args={[2.2, 0.06, 0.04]} />
+          <meshStandardMaterial color="white" />
+        </mesh>
+        <mesh position={[-1.1, 0, 0]}>
+          <boxGeometry args={[0.06, 0.75, 0.04]} />
+          <meshStandardMaterial color="white" />
+        </mesh>
+        <mesh position={[1.1, 0, 0]}>
+          <boxGeometry args={[0.06, 0.75, 0.04]} />
+          <meshStandardMaterial color="white" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+function WoodWallSegment({ start, end, height = 3.5 }) {
+  const [x1, z1] = start;
+  const [x2, z2] = end;
+
+  const length = Math.sqrt((x2 - x1) ** 2 + (z2 - z1) ** 2);
+  const x = (x1 + x2) / 2;
+  const z = (z1 + z2) / 2;
+  const rotation = -Math.atan2(z2 - z1, x2 - x1);
+  const rows = Array.from({ length: Math.floor(height / 0.22) });
+
+  return (
+    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+      <mesh position={[0, height / 2, 0]}>
+        <boxGeometry args={[length, height, 0.25]} />
+        <meshStandardMaterial color="#b98a58" />
+      </mesh>
+
+      {rows.map((_, i) => (
+        <mesh key={i} position={[0, i * 0.22 + 0.1, 0.14]}>
+          <boxGeometry args={[length, 0.025, 0.035]} />
+          <meshStandardMaterial color="#7a4a24" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 function FourWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
   const selected = selectedId === fixture.id;
   const arms = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2];
@@ -1165,50 +1259,54 @@ function FourWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
     </group>
   );
 }
-function POSDesk({
-  fixture,
-  selectedId,
-  setSelectedId,
-}) {
-  const selected =
-    selectedId === fixture.id;
+function POSDesk({ fixture, selectedId, setSelectedId }) {
+  const selected = selectedId === fixture.id;
 
   return (
     <group
-      position={[
-        fixture.x,
-        0,
-        fixture.z,
-      ]}
-      rotation={[
-        0,
-        fixture.rotation,
-        0,
-      ]}
+      position={[fixture.x, 0, fixture.z]}
+      rotation={[0, fixture.rotation, 0]}
       onClick={(e) => {
         e.stopPropagation();
         setSelectedId(fixture.id);
       }}
     >
+      {/* long wood counter */}
       <mesh position={[0, 0.55, 0]}>
-        <boxGeometry args={[5.2, 1.1, 1.2]} />
-        <meshStandardMaterial
-          color={
-            selected
-              ? "#2563eb"
-              : "#d9b382"
-          }
-        />
+        <boxGeometry args={[3.8, 1.1, 0.85]} />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#c49a6c"} />
       </mesh>
 
+      {/* dark countertop */}
       <mesh position={[0, 1.13, 0]}>
-        <boxGeometry args={[5.3, 0.08, 1.25]} />
-        <meshStandardMaterial color="#333" />
+        <boxGeometry args={[3.95, 0.08, 0.95]} />
+        <meshStandardMaterial color="#3b3b3b" />
       </mesh>
 
-      <mesh position={[0, 0.7, 0.63]}>
-        <boxGeometry args={[1.8, 0.9, 0.08]} />
+      {/* crimson front panel */}
+      <mesh position={[0, 0.72, 0.46]}>
+        <boxGeometry args={[1.25, 0.75, 0.06]} />
         <meshStandardMaterial color="#8c1d40" />
+      </mesh>
+
+      {/* left register */}
+      <mesh position={[-1.15, 1.32, 0.05]}>
+        <boxGeometry args={[0.45, 0.35, 0.08]} />
+        <meshStandardMaterial color="#eeeeee" />
+      </mesh>
+      <mesh position={[-1.15, 1.52, -0.08]}>
+        <boxGeometry args={[0.5, 0.32, 0.06]} />
+        <meshStandardMaterial color="#dddddd" />
+      </mesh>
+
+      {/* right register */}
+      <mesh position={[1.15, 1.32, 0.05]}>
+        <boxGeometry args={[0.45, 0.35, 0.08]} />
+        <meshStandardMaterial color="#eeeeee" />
+      </mesh>
+      <mesh position={[1.15, 1.52, -0.08]}>
+        <boxGeometry args={[0.5, 0.32, 0.06]} />
+        <meshStandardMaterial color="#dddddd" />
       </mesh>
     </group>
   );
@@ -1350,6 +1448,52 @@ function WallHookRack({
     </group>
   );
 }
+
+function WallApparelRail({ fixture, selectedId, setSelectedId, productCatalog }) {
+  const selected = selectedId === fixture.id;
+  const products = fixture.products || [];
+
+  return (
+    <group
+      position={[fixture.x, 0, fixture.z]}
+      rotation={[0, fixture.rotation, 0]}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedId(fixture.id);
+      }}
+    >
+      <mesh position={[0, 1.35, 0.04]}>
+        <boxGeometry args={[2.4, 1.4, 0.05]} />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#caa06a"} />
+      </mesh>
+
+      <mesh position={[0, 1.85, 0.2]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.03, 0.03, 2.2, 16]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
+      {[-0.85, 0, 0.85].map((x) => (
+        <mesh key={x} position={[x, 1.85, 0.1]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.02, 0.02, 0.28, 12]} />
+          <meshStandardMaterial color="#777" />
+        </mesh>
+      ))}
+
+      {[0, 1, 2, 3].map((i) => (
+        <ProductCard
+          key={i}
+          productId={products[i]}
+          productCatalog={productCatalog}
+          x={-0.72 + i * 0.48}
+          y={1.35}
+          z={0.35}
+          scale={0.62}
+        />
+      ))}
+    </group>
+  );
+}
+
 function ThreeWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
   const selected = selectedId === fixture.id;
   const products = fixture.products || [];
@@ -1545,14 +1689,6 @@ const startingFixtures = [
     ],
   },
   {
-    id: "Checkout Desk",
-    type: "desk",
-    x: -6.5,
-    z: 0,
-    rotation: Math.PI / 2,
-    products: [],
-  },
-  {
     id: "Table 1",
     type: "table",
     x: -6.1,
@@ -1688,27 +1824,11 @@ function getDefaultFixturesForStore(storeId) {
   return cloneFixtures(startingFixturesByStore[storeId] || []);
 }
 function WoodFloor({ size = [22, 20] }) {
-  const [width, depth] = size;
-  const boardCount = Math.floor(width / 0.38);
-
   return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={size} />
-        <meshStandardMaterial color="#b98243" roughness={0.75} />
-      </mesh>
-
-      {Array.from({ length: boardCount }).map((_, i) => (
-        <mesh
-          key={i}
-          position={[-width / 2 + i * 0.38, 0.006, 0]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <planeGeometry args={[0.018, depth]} />
-          <meshStandardMaterial color={i % 2 === 0 ? "#8f5f2f" : "#c08a4b"} roughness={0.8} />
-        </mesh>
-      ))}
-    </group>
+    <mesh rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={size} />
+      <meshStandardMaterial color="#a8753b" roughness={0.65} />
+    </mesh>
   );
 }
 function FirstPersonWalkControls({ enabled, startPosition = [0, 1.6, 6], walls = [], fixtures = [], floorSize = [22, 20] }) {
@@ -1833,241 +1953,6 @@ function canWalkTo(x, z, walls, fixtures, floorSize) {
   const hitsFixture = fixtures.some((fixture) => isInsideFixture(x, z, fixture));
 
   return !hitsFixture;
-}
-
-
-function WoodSlatWall({
-  x,
-  z,
-  rotation = 0,
-  width = 6,
-  height = 2.8,
-}) {
-  const rows = Array.from({
-    length: Math.floor(height / 0.22),
-  });
-
-  return (
-    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
-      <mesh position={[0, height / 2, 0]}>
-        <boxGeometry args={[width, height, 0.08]} />
-        <meshStandardMaterial color="#b98a58" />
-      </mesh>
-
-      {rows.map((_, i) => (
-        <mesh
-          key={i}
-          position={[
-            0,
-            i * 0.22 + 0.1,
-            0.05,
-          ]}
-        >
-          <boxGeometry args={[width, 0.02, 0.03]} />
-          <meshStandardMaterial color="#8a5a2c" />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function MapMuralWall({ x, z, rotation = 0, width = 6.5, height = 2.6 }) {
-  const blocks = [
-    [-2.4, 0.6, 0.55, 0.28],
-    [-1.6, 1.0, 0.42, 0.22],
-    [-0.8, 0.45, 0.72, 0.26],
-    [0.15, 1.2, 0.55, 0.25],
-    [0.9, 0.75, 0.7, 0.3],
-    [1.75, 1.35, 0.38, 0.28],
-    [2.35, 0.5, 0.48, 0.26],
-    [-2.05, -0.55, 0.62, 0.24],
-    [-1.05, -0.95, 0.45, 0.22],
-    [0.15, -0.45, 0.8, 0.28],
-    [1.25, -0.85, 0.52, 0.22],
-    [2.1, -0.35, 0.62, 0.24],
-  ];
-
-  return (
-    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
-      <mesh position={[0, height / 2, 0]}>
-        <boxGeometry args={[width, height, 0.07]} />
-        <meshStandardMaterial color="#e8e3dc" />
-      </mesh>
-
-      {Array.from({ length: 14 }).map((_, i) => (
-        <mesh key={`road-x-${i}`} position={[-width / 2 + i * 0.5, height / 2, 0.055]} rotation={[0, 0, 0.55]}>
-          <boxGeometry args={[0.035, height * 1.25, 0.03]} />
-          <meshStandardMaterial color="#b9b1aa" />
-        </mesh>
-      ))}
-
-      {Array.from({ length: 8 }).map((_, i) => (
-        <mesh key={`road-y-${i}`} position={[0, 0.35 + i * 0.27, 0.06]} rotation={[0, 0, -0.95]}>
-          <boxGeometry args={[width * 0.9, 0.035, 0.03]} />
-          <meshStandardMaterial color="#b9b1aa" />
-        </mesh>
-      ))}
-
-      {blocks.map(([bx, by, bw, bh], i) => (
-        <mesh key={i} position={[bx, height / 2 + by * 0.45, 0.08]}>
-          <boxGeometry args={[bw, bh, 0.04]} />
-          <meshStandardMaterial color="#c92f3f" />
-        </mesh>
-      ))}
-
-      <group position={[1.55, 1.85, 0.12]}>
-        <mesh position={[0, 0, 0]}>
-          <boxGeometry args={[2.3, 0.08, 0.04]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
-        <mesh position={[0, -0.78, 0]}>
-          <boxGeometry args={[2.3, 0.08, 0.04]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
-        <mesh position={[-1.15, -0.39, 0]}>
-          <boxGeometry args={[0.08, 0.86, 0.04]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
-        <mesh position={[1.15, -0.39, 0]}>
-          <boxGeometry args={[0.08, 0.86, 0.04]} />
-          <meshStandardMaterial color="white" />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
-function RedHSign({ x, z, rotation = 0 }) {
-  return (
-    <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
-      <mesh position={[0, 1.6, 0]}>
-        <boxGeometry args={[1.0, 1.5, 0.15]} />
-        <meshStandardMaterial color="#d71920" />
-      </mesh>
-      <mesh position={[0, 1.6, 0.09]}>
-        <boxGeometry args={[0.3, 1.1, 0.05]} />
-        <meshStandardMaterial color="white" />
-      </mesh>
-      <mesh position={[0, 1.6, 0.1]}>
-        <boxGeometry args={[1.05, 0.3, 0.05]} />
-        <meshStandardMaterial color="white" />
-      </mesh>
-    </group>
-  );
-}
-
-function CeilingPipesAndLights({ size = [22, 20] }) {
-  const [w, d] = size;
-  const zLines = [-d / 3, -d / 8, d / 8, d / 3];
-
-  return (
-    <group>
-      {zLines.map((z, i) => (
-        <group key={z}>
-          <mesh position={[0, 3.75, z]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.025, 0.025, w * 0.8, 16]} />
-            <meshStandardMaterial color="#f1f1f1" />
-          </mesh>
-
-          {[-w / 4, 0, w / 4].map((x, j) => (
-            <group key={`${i}-${j}`} position={[x, 3.45, z]}>
-              <mesh rotation={[Math.PI / 2, 0, 0]}>
-                <cylinderGeometry args={[0.06, 0.09, 0.22, 16]} />
-                <meshStandardMaterial color="#ffffff" />
-              </mesh>
-              <pointLight intensity={0.25} distance={4} />
-            </group>
-          ))}
-        </group>
-      ))}
-    </group>
-  );
-}
-
-function StoreAtmosphere({
-  storeId,
-  floorSize,
-}) {
-  if (storeId !== "massAve") return null;
-
-  return (
-    <group>
-      {/* GREEN WALL */}
-      <WoodSlatWall
-        x={0}
-        z={-7.3}
-        width={13}
-      />
-
-      {/* CYAN WALL */}
-      <WoodSlatWall
-        x={6.8}
-        z={-2.3}
-        rotation={-0.62}
-        width={7}
-      />
-
-      {/* PURPLE RIGHT */}
-      <WoodSlatWall
-        x={8.0}
-        z={3.5}
-        rotation={-1.2}
-        width={3.5}
-      />
-
-      {/* PURPLE LEFT MAP WALL */}
-      <MapMuralWall
-        x={-8.3}
-        z={0}
-        rotation={Math.PI / 2}
-        width={8}
-      />
-
-      {/* GOLD FEATURE WALL */}
-      <group position={[8.2, 5.8, 0]}>
-        {/* greenery */}
-        <mesh position={[0, 1.4, 0]}>
-          <boxGeometry args={[2.2, 2.8, 0.08]} />
-          <meshStandardMaterial color="#1d5b37" />
-        </mesh>
-
-        {/* red panel */}
-        <mesh position={[0, 1.4, 0.09]}>
-          <boxGeometry args={[1.6, 2.3, 0.04]} />
-          <meshStandardMaterial color="#a51c30" />
-        </mesh>
-
-        {/* lower shelves only */}
-        {[0.3, 0.9, 1.5].map((y) => (
-          <mesh
-            key={y}
-            position={[-0.65, y, 0.25]}
-          >
-            <boxGeometry args={[1.1, 0.08, 0.4]} />
-            <meshStandardMaterial color="#d9b382" />
-          </mesh>
-        ))}
-
-        {/* apparel fixture side */}
-        <mesh
-          position={[0.55, 1.6, 0.3]}
-          rotation={[0, 0, Math.PI / 2]}
-        >
-          <cylinderGeometry
-            args={[0.03, 0.03, 2.1]}
-          />
-          <meshStandardMaterial color="#888" />
-        </mesh>
-      </group>
-
-      {/* RED H */}
-      <RedHSign
-        x={7.9}
-        z={5.2}
-        rotation={-1.2}
-      />
-    </group>
-  );
 }
 
 export default function App() {
@@ -2649,7 +2534,6 @@ export default function App() {
         )}
 
         <WoodFloor size={activeFloorSize} />
-        <StoreAtmosphere storeId={activeStoreId} floorSize={activeFloorSize} />
         <WalkableFloor
           size={activeFloorSize}
           onDropIn={(position) => {
@@ -2658,9 +2542,45 @@ export default function App() {
           }}
         />
 
-        {activeWalls.map(([start, end], index) => (
-      <WallSegment key={`${activeStoreId}-wall-${index}`} start={start} end={end} />
-    ))}
+        {activeWalls.map(([start, end], index) => {
+          const massAveWallTypes = {
+            0: "wood",
+            1: "wood",
+            2: "wood",
+            3: "wood",
+            4: "map",
+          };
+
+          const wallType = activeStoreId === "massAve" ? massAveWallTypes[index] : "plain";
+
+          if (wallType === "wood") {
+            return (
+              <WoodWallSegment
+                key={`${activeStoreId}-wood-wall-${index}`}
+                start={start}
+                end={end}
+              />
+            );
+          }
+
+          if (wallType === "map") {
+            return (
+              <MapWallSegment
+                key={`${activeStoreId}-map-wall-${index}`}
+                start={start}
+                end={end}
+              />
+            );
+          }
+
+          return (
+            <WallSegment
+              key={`${activeStoreId}-wall-${index}`}
+              start={start}
+              end={end}
+            />
+          );
+        })}
     
     {activeStoreId === "massAve" && (
       <>
@@ -2719,6 +2639,19 @@ export default function App() {
               />
             );
           }
+
+          if (fixture.type === "wallRail") {
+            return (
+              <WallApparelRail
+                key={fixture.id}
+                fixture={fixture}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+                productCatalog={productCatalog}
+              />
+            );
+          }
+
           if (fixture.type === "table") {
             return (
               <DisplayTable
