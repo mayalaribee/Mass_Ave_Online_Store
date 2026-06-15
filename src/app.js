@@ -1756,16 +1756,15 @@ function WalkableFloor({ size, onDropIn }) {
   );
 }
 
-const WALK_RADIUS = 0.32;
-const FIXTURE_COLLISION_PADDING = 0.35;
+const WALK_RADIUS = 0.42;
 
-const fixtureCollisionSizes = {
-  fourWay: [1.6, 1.6],
-  horizontal: [3.2, 1.0],
-  threeWay: [2.8, 1.4],
-  table: [2.9, 1.6],
-  wallHook: [1.1, 1.0],
-  desk: [4.3, 1.4],
+const fixtureCollisionRadii = {
+  fourWay: 1.35,
+  horizontal: 1.95,
+  threeWay: 1.75,
+  table: 1.65,
+  wallHook: 0.95,
+  desk: 2.45,
 };
 
 function pointNearSegment(px, pz, start, end, radius) {
@@ -1777,8 +1776,7 @@ function pointNearSegment(px, pz, start, end, radius) {
   const lengthSquared = dx * dx + dz * dz;
 
   if (lengthSquared === 0) {
-    const distance = Math.hypot(px - x1, pz - z1);
-    return distance < radius;
+    return Math.hypot(px - x1, pz - z1) < radius;
   }
 
   const t = Math.max(0, Math.min(1, ((px - x1) * dx + (pz - z1) * dz) / lengthSquared));
@@ -1789,18 +1787,8 @@ function pointNearSegment(px, pz, start, end, radius) {
 }
 
 function isInsideFixture(px, pz, fixture) {
-  const [width, depth] = fixtureCollisionSizes[fixture.type] || [1.3, 1.3];
-  const halfWidth = width / 2 + FIXTURE_COLLISION_PADDING;
-  const halfDepth = depth / 2 + FIXTURE_COLLISION_PADDING;
-
-  const dx = px - fixture.x;
-  const dz = pz - fixture.z;
-  const rotation = -(fixture.rotation || 0);
-
-  const localX = dx * Math.cos(rotation) - dz * Math.sin(rotation);
-  const localZ = dx * Math.sin(rotation) + dz * Math.cos(rotation);
-
-  return Math.abs(localX) < halfWidth && Math.abs(localZ) < halfDepth;
+  const radius = fixtureCollisionRadii[fixture.type] || 1.25;
+  return Math.hypot(px - fixture.x, pz - fixture.z) < radius + WALK_RADIUS;
 }
 
 function canWalkTo(x, z, walls, fixtures, floorSize) {
@@ -1836,6 +1824,7 @@ export default function App() {
   const [newProductName, setNewProductName] = useState("");
   const [newProductImage, setNewProductImage] = useState("");
   const [productSearch, setProductSearch] = useState("");
+  const [selectedProductSlot, setSelectedProductSlot] = useState(0);
   const [walkMode, setWalkMode] = useState(false);
   const [walkStartPosition, setWalkStartPosition] = useState([0, 1.6, 6]);
 
@@ -1881,6 +1870,11 @@ export default function App() {
   }, [customProducts]);
 
   const selectedFixture = fixtures.find((f) => f.id === selectedId);
+
+  useEffect(() => {
+    setSelectedProductSlot(0);
+    setProductSearch("");
+  }, [selectedId]);
 
   function moveSelected(dx, dz) {
     if (!selectedId) return;
@@ -2203,27 +2197,127 @@ export default function App() {
             <hr style={{ margin: "14px 0", border: "none", borderTop: "1px solid #ddd" }} />
 
             <h3 style={sectionTitleStyle}>Products on Selected Rack</h3>
+
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              {Array.from({ length: getSlotCount(selectedFixture.type) }).map((_, slotIndex) => (
+                <button
+                  key={slotIndex}
+                  onClick={() => setSelectedProductSlot(slotIndex)}
+                  style={{
+                    ...buttonStyle,
+                    flex: 1,
+                    padding: "8px 6px",
+                    background: selectedProductSlot === slotIndex ? "#7f1d1d" : "white",
+                    color: selectedProductSlot === slotIndex ? "white" : "#3b2f2f",
+                  }}
+                >
+                  {slotIndex + 1}
+                </button>
+              ))}
+            </div>
+
             <input
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}
-              placeholder="Search products for this rack..."
+              placeholder={`Search product for slot ${selectedProductSlot + 1}...`}
               style={inputStyle}
             />
-            {Array.from({ length: getSlotCount(selectedFixture.type) }).map((_, slotIndex) => (
-              <select
-                key={slotIndex}
-                value={selectedFixture.products?.[slotIndex] || ""}
-                onChange={(e) => assignProductToSlot(slotIndex, e.target.value)}
-                style={{ ...inputStyle, padding: 8, marginBottom: 6 }}
-              >
-                <option value="">Slot {slotIndex + 1}: Empty</option>
-                {filteredProductOptions.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    Slot {slotIndex + 1}: {product.name}
-                  </option>
-                ))}
-              </select>
-            ))}
+
+            <div
+              style={{
+                maxHeight: 220,
+                overflowY: "auto",
+                border: "1px solid #d8d3cc",
+                borderRadius: 12,
+                marginBottom: 10,
+                background: "white",
+              }}
+            >
+              {filteredProductOptions.length === 0 && (
+                <div style={{ padding: 10, fontSize: 13, color: "#7f6b5f" }}>
+                  No matching products.
+                </div>
+              )}
+
+              {filteredProductOptions.slice(0, 40).map((product) => (
+                <button
+                  key={product.id}
+                  onClick={() => {
+                    assignProductToSlot(selectedProductSlot, product.id);
+                    setProductSearch("");
+                  }}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "9px 10px",
+                    border: "none",
+                    borderBottom: "1px solid #eee",
+                    background:
+                      selectedFixture.products?.[selectedProductSlot] === product.id
+                        ? "#f3e8e8"
+                        : "white",
+                    cursor: "pointer",
+                    fontSize: 13,
+                  }}
+                >
+                  Add to slot {selectedProductSlot + 1}: {product.name}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ fontSize: 12, color: "#7f6b5f", marginBottom: 8 }}>
+              Current slots:
+            </div>
+
+            {Array.from({ length: getSlotCount(selectedFixture.type) }).map((_, slotIndex) => {
+              const productId = selectedFixture.products?.[slotIndex];
+              const productName = productId ? productCatalog[productId]?.name || productId : "Empty";
+
+              return (
+                <div
+                  key={slotIndex}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 8,
+                    fontSize: 12,
+                    padding: "6px 0",
+                    borderBottom: "1px solid #eee",
+                  }}
+                >
+                  <button
+                    onClick={() => setSelectedProductSlot(slotIndex)}
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer",
+                      fontWeight: selectedProductSlot === slotIndex ? 900 : 600,
+                      color: selectedProductSlot === slotIndex ? "#7f1d1d" : "#3b2f2f",
+                      textAlign: "left",
+                    }}
+                  >
+                    Slot {slotIndex + 1}: {productName}
+                  </button>
+
+                  {productId && (
+                    <button
+                      onClick={() => assignProductToSlot(slotIndex, "")}
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        color: "#7f1d1d",
+                        cursor: "pointer",
+                        fontWeight: 800,
+                      }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              );
+            })}
 
             <button
               style={{ ...buttonStyle, width: "100%", marginTop: 8 }}
