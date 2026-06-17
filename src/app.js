@@ -1534,6 +1534,8 @@ function WallApparelRail({
 }) {
   const selected = selectedId === fixture.id;
   const products = fixture.products || [];
+  const topRow = products.slice(0, 4);
+  const bottomRow = products.slice(0, 4);
 
   return (
     <group
@@ -1544,36 +1546,62 @@ function WallApparelRail({
         setSelectedId(fixture.id);
       }}
     >
-      {/* metal support rail */}
-      <mesh
-        position={[0, 2.35, 0.12]}
-        rotation={[0, 0, Math.PI / 2]}
-      >
-        <cylinderGeometry args={[0.03, 0.03, 2.3, 16]} />
+      {selected && (
+        <mesh position={[0, 2.05, 0.03]}>
+          <boxGeometry args={[2.65, 1.45, 0.04]} />
+          <meshStandardMaterial color="#2563eb" transparent opacity={0.25} />
+        </mesh>
+      )}
+
+      {/* upper metal support rail */}
+      <mesh position={[0, 2.55, 0.14]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.03, 0.03, 2.45, 16]} />
         <meshStandardMaterial color="#666" />
       </mesh>
 
+      {/* lower metal support rail */}
+      <mesh position={[0, 1.95, 0.14]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.025, 0.025, 2.45, 16]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
       {/* wall brackets */}
-      {[-0.9, -0.3, 0.3, 0.9].map((x) => (
-        <mesh
-          key={x}
-          position={[x, 2.35, 0.08]}
-          rotation={[Math.PI / 2, 0, 0]}
-        >
-          <cylinderGeometry args={[0.015, 0.015, 0.18, 12]} />
-          <meshStandardMaterial color="#777" />
-        </mesh>
+      {[-0.95, -0.3, 0.35, 0.95].map((x) => (
+        <React.Fragment key={x}>
+          <mesh position={[x, 2.55, 0.08]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.015, 0.015, 0.2, 12]} />
+            <meshStandardMaterial color="#777" />
+          </mesh>
+
+          <mesh position={[x, 1.95, 0.08]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.015, 0.015, 0.2, 12]} />
+            <meshStandardMaterial color="#777" />
+          </mesh>
+        </React.Fragment>
       ))}
 
-      {/* top row */}
-      {[0, 1, 2, 3].map((i) => (
+      {/* upper row */}
+      {topRow.map((productId, i) => (
         <ProductCard
-          key={i}
-          productId={products[i]}
+          key={`top-${i}`}
+          productId={productId}
           productCatalog={productCatalog}
           x={-0.9 + i * 0.6}
-          y={2.0}
-          z={0.28}
+          y={2.28}
+          z={0.3}
+          scale={0.72}
+        />
+      ))}
+
+      {/* lower row moved up to align with the wall display */}
+      {bottomRow.map((productId, i) => (
+        <ProductCard
+          key={`bottom-${i}`}
+          productId={productId}
+          productCatalog={productCatalog}
+          x={-0.9 + i * 0.6}
+          y={1.68}
+          z={0.3}
           scale={0.72}
         />
       ))}
@@ -1978,17 +2006,6 @@ function FirstPersonWalkControls({ enabled, startPosition = [0, 1.6, 6], walls =
 
     camera.position.y = startPosition[1];
   });
-    if (fixture.type === "twoWay") {
-    return (
-      <TwoWayRack
-        key={fixture.id}
-        fixture={fixture}
-        selectedId={selectedId}
-        setSelectedId={setSelectedId}
-        productCatalog={productCatalog}
-      />
-    );
-  }
   return null;
 }
 
@@ -2015,6 +2032,8 @@ const fixtureCollisionRadii = {
   threeWay: 1.75,
   table: 1.65,
   wallHook: 0.95,
+  wallRail: 1.35,
+  twoWay: 1.25,
   desk: 2.45,
 };
 
@@ -2754,6 +2773,18 @@ export default function App() {
           if (fixture.type === "wallRail") {
             return (
               <WallApparelRail
+                key={fixture.id}
+                fixture={fixture}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+                productCatalog={productCatalog}
+              />
+            );
+          }
+
+          if (fixture.type === "twoWay") {
+            return (
+              <TwoWayRack
                 key={fixture.id}
                 fixture={fixture}
                 selectedId={selectedId}
