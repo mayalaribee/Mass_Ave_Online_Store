@@ -1071,6 +1071,7 @@ const rackTypes = {
   table: { label: "Display Table", slots: 4 },
   wallHook: { label: "Wall Hook Rack", slots: 2 },
   wallRail: { label: "Wall Apparel Rail", slots: 4 },
+  twoWay: { label: "Two-Way Rack", slots: 2 },
   desk: { label: "POS Desk", slots: 3 },
 };
 
@@ -1216,7 +1217,62 @@ function WoodWallSegment({ start, end, height = 3.5 }) {
     </group>
   );
 }
+function TwoWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
+  const selected = selectedId === fixture.id;
+  const products = fixture.products || [];
 
+  return (
+    <group
+      position={[fixture.x, 0, fixture.z]}
+      rotation={[0, fixture.rotation, 0]}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedId(fixture.id);
+      }}
+    >
+      {/* base */}
+      <mesh position={[0, 0.05, 0]}>
+        <cylinderGeometry args={[0.45, 0.45, 0.1, 32]} />
+        <meshStandardMaterial color={selected ? "#2563eb" : "#cfcfcf"} />
+      </mesh>
+
+      {/* center pole */}
+      <mesh position={[0, 0.9, 0]}>
+        <cylinderGeometry args={[0.04, 0.04, 1.8, 16]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
+      {/* two opposite arms */}
+      <mesh position={[0.55, 1.55, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.035, 0.035, 1.1, 16]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
+      <mesh position={[-0.55, 1.55, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.035, 0.035, 1.1, 16]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
+      <ProductCard
+        productId={products[0]}
+        productCatalog={productCatalog}
+        x={0.65}
+        y={1.12}
+        z={0}
+        scale={0.8}
+      />
+
+      <ProductCard
+        productId={products[1]}
+        productCatalog={productCatalog}
+        x={-0.65}
+        y={1.12}
+        z={0}
+        scale={0.8}
+      />
+    </group>
+  );
+}
 function FourWayRack({ fixture, selectedId, setSelectedId, productCatalog }) {
   const selected = selectedId === fixture.id;
   const arms = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2];
@@ -1323,18 +1379,39 @@ function DisplayTable({ fixture, selectedId, setSelectedId, productCatalog }) {
         setSelectedId(fixture.id);
       }}
     >
-      <mesh position={[0, 0.45, 0]}>
-        <boxGeometry args={[2.4, 0.2, 1.15]} />
+      {/* tabletop */}
+      <mesh position={[0, 0.85, 0]}>
+        <boxGeometry args={[2.6, 0.16, 1.25]} />
         <meshStandardMaterial color={selected ? "#2563eb" : "#8b5a2b"} />
       </mesh>
 
+      {/* metal frame under tabletop */}
+      <mesh position={[0, 0.68, 0]}>
+        <boxGeometry args={[2.35, 0.08, 1.05]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+
+      {/* legs */}
+      {[
+        [-1.05, 0.35, -0.45],
+        [1.05, 0.35, -0.45],
+        [-1.05, 0.35, 0.45],
+        [1.05, 0.35, 0.45],
+      ].map(([x, y, z], i) => (
+        <mesh key={i} position={[x, y, z]}>
+          <boxGeometry args={[0.08, 0.7, 0.08]} />
+          <meshStandardMaterial color="#777" />
+        </mesh>
+      ))}
+
+      {/* products on top */}
       {fixture.products.slice(0, 4).map((p, i) => (
         <ProductCard
           key={i}
           productId={p}
           productCatalog={productCatalog}
           x={-0.75 + i * 0.5}
-          y={0.83}
+          y={1.22}
           z={0}
           scale={0.65}
         />
@@ -1827,7 +1904,17 @@ function FirstPersonWalkControls({ enabled, startPosition = [0, 1.6, 6], walls =
 
     camera.position.y = startPosition[1];
   });
-
+    if (fixture.type === "twoWay") {
+    return (
+      <TwoWayRack
+        key={fixture.id}
+        fixture={fixture}
+        selectedId={selectedId}
+        setSelectedId={setSelectedId}
+        productCatalog={productCatalog}
+      />
+    );
+  }
   return null;
 }
 
