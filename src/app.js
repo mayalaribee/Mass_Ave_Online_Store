@@ -1070,7 +1070,7 @@ const rackTypes = {
   threeWay: { label: "Family / Six-Hook Rack", slots: 6 },
   table: { label: "Display Table", slots: 4 },
   wallHook: { label: "Wall Hook Rack", slots: 2 },
-  wallRail: { label: "Wall Apparel Rail", slots: 4 },
+  wallRail: { label: "Wall Apparel Rail", slots: 8 },
   twoWay: { label: "Two-Way Rack", slots: 2 },
   desk: { label: "POS Desk", slots: 3 },
 };
@@ -1534,7 +1534,6 @@ function WallApparelRail({
 }) {
   const selected = selectedId === fixture.id;
   const products = fixture.products || [];
-  const displayProducts = products.length ? products : makeEmptyProducts("wallRail");
 
   return (
     <group
@@ -1545,15 +1544,13 @@ function WallApparelRail({
         setSelectedId(fixture.id);
       }}
     >
-      {/* this back plate sits directly on the wall */}
-      <mesh position={[0, 2.05, 0.015]}>
-        <boxGeometry args={[2.55, 1.55, 0.035]} />
-        <meshStandardMaterial
-          color={selected ? "#2563eb" : "#b98a58"}
-          transparent
-          opacity={selected ? 0.35 : 0.22}
-        />
-      </mesh>
+      {/* selected backing plate */}
+      {selected && (
+        <mesh position={[0, 2.05, 0.03]}>
+          <boxGeometry args={[2.65, 1.55, 0.04]} />
+          <meshStandardMaterial color="#2563eb" transparent opacity={0.25} />
+        </mesh>
+      )}
 
       {/* upper rail */}
       <mesh position={[0, 2.52, 0.09]} rotation={[0, 0, Math.PI / 2]}>
@@ -1567,13 +1564,14 @@ function WallApparelRail({
         <meshStandardMaterial color="#666" />
       </mesh>
 
-      {/* brackets into the wall */}
+      {/* brackets into wall */}
       {[-0.9, -0.3, 0.3, 0.9].map((x) => (
         <React.Fragment key={x}>
           <mesh position={[x, 2.52, 0.045]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.014, 0.014, 0.22, 12]} />
             <meshStandardMaterial color="#666" />
           </mesh>
+
           <mesh position={[x, 1.88, 0.045]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.014, 0.014, 0.22, 12]} />
             <meshStandardMaterial color="#666" />
@@ -1581,26 +1579,26 @@ function WallApparelRail({
         </React.Fragment>
       ))}
 
-      {/* upper row */}
-      {[0, 1, 2, 3].map((i) => (
+      {/* upper row: slots 1-4 */}
+      {[0, 1, 2, 3].map((slotIndex) => (
         <ProductCard
-          key={`upper-${i}`}
-          productId={displayProducts[i]}
+          key={`upper-${slotIndex}`}
+          productId={products[slotIndex]}
           productCatalog={productCatalog}
-          x={-0.9 + i * 0.6}
+          x={-0.9 + slotIndex * 0.6}
           y={2.22}
           z={0.22}
           scale={0.68}
         />
       ))}
 
-      {/* lower row, kept high on the same wall display */}
-      {[0, 1, 2, 3].map((i) => (
+      {/* lower row: slots 5-8 */}
+      {[4, 5, 6, 7].map((slotIndex, visualIndex) => (
         <ProductCard
-          key={`lower-${i}`}
-          productId={displayProducts[i]}
+          key={`lower-${slotIndex}`}
+          productId={products[slotIndex]}
           productCatalog={productCatalog}
-          x={-0.9 + i * 0.6}
+          x={-0.9 + visualIndex * 0.6}
           y={1.58}
           z={0.22}
           scale={0.68}
@@ -1703,6 +1701,10 @@ const startingFixtures = [
       "harvardArcTeeOxford",
       "harvardArcTeeBlack",
       "harvardArcTeeWhite",
+      "harvardCrestCrewneckCrimson",
+      "harvardCrestCrewneckOxford",
+      "harvardArcCrewneckCrimson",
+      "harvardArcCrewneckOxford",
     ],
   },
   {
@@ -1716,6 +1718,10 @@ const startingFixtures = [
       "crestTeeNavy",
       "crestTeeWhite",
       "benchmarkCrewNavy",
+      "benchmarkCrewRed",
+      "benchmarkCrewOxford",
+      "proWeaveCrewBlack",
+      "proWeaveCrewOxford",
     ],
   },
   {
@@ -1729,6 +1735,10 @@ const startingFixtures = [
       "crestHoodNavy",
       "proWeaveHoodCrimson",
       "proWeaveHoodOatmeal",
+      "crestHoodOxford",
+      "harvardHoodedArcSweatshirtCrimson",
+      "harvardHoodedArcSweatshirtOxford",
+      "harvardCollegiateHoodGarnet",
     ],
   },
   {
@@ -1742,6 +1752,10 @@ const startingFixtures = [
       "proWeaveCrewBlack",
       "proWeaveCrewOxford",
       "harvardArcCrewneckCrimson",
+      "harvardArcCrewneckOxford",
+      "harvardChampionReverseWeaveCrewOxford",
+      "harvardChampionReverseWeaveCrewGarnet",
+      "theClassicHarvardCrewGreen",
     ],
   },
   {
@@ -1755,6 +1769,10 @@ const startingFixtures = [
       "harvardHoodedArcSweatshirtOxford",
       "theHSweaterCrimson",
       "theHSweaterCream",
+      "thePremierHarvardFeltHoodNavy",
+      "thePremierHarvardFeltHoodBlack",
+      "harvardPackNGoPulloverBlack",
+      "harvardPackNGoPulloverMaroon",
     ],
   },
 {
@@ -2475,7 +2493,7 @@ export default function App() {
                     color: selectedProductSlot === slotIndex ? "white" : "#3b2f2f",
                   }}
                 >
-                  {slotIndex + 1}
+                  {selectedFixture.type === "wallRail" ? (slotIndex < 4 ? `Top ${slotIndex + 1}` : `Bottom ${slotIndex - 3}`) : slotIndex + 1}
                 </button>
               ))}
             </div>
@@ -2562,7 +2580,7 @@ export default function App() {
                       textAlign: "left",
                     }}
                   >
-                    Slot {slotIndex + 1}: {productName}
+                    {selectedFixture.type === "wallRail" ? (slotIndex < 4 ? `Top ${slotIndex + 1}` : `Bottom ${slotIndex - 3}`) : `Slot ${slotIndex + 1}`}: {productName}
                   </button>
 
                   {productId && (
