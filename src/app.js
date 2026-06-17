@@ -1526,7 +1526,12 @@ function WallHookRack({
   );
 }
 
-function WallApparelRail({ fixture, selectedId, setSelectedId, productCatalog }) {
+function WallApparelRail({
+  fixture,
+  selectedId,
+  setSelectedId,
+  productCatalog,
+}) {
   const selected = selectedId === fixture.id;
   const products = fixture.products || [];
 
@@ -1539,32 +1544,37 @@ function WallApparelRail({ fixture, selectedId, setSelectedId, productCatalog })
         setSelectedId(fixture.id);
       }}
     >
-      <mesh position={[0, 1.35, 0.04]}>
-        <boxGeometry args={[2.4, 1.4, 0.05]} />
-        <meshStandardMaterial color={selected ? "#2563eb" : "#caa06a"} />
+      {/* metal support rail */}
+      <mesh
+        position={[0, 2.35, 0.12]}
+        rotation={[0, 0, Math.PI / 2]}
+      >
+        <cylinderGeometry args={[0.03, 0.03, 2.3, 16]} />
+        <meshStandardMaterial color="#666" />
       </mesh>
 
-      <mesh position={[0, 1.85, 0.2]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.03, 0.03, 2.2, 16]} />
-        <meshStandardMaterial color="#777" />
-      </mesh>
-
-      {[-0.85, 0, 0.85].map((x) => (
-        <mesh key={x} position={[x, 1.85, 0.1]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.02, 0.02, 0.28, 12]} />
+      {/* wall brackets */}
+      {[-0.9, -0.3, 0.3, 0.9].map((x) => (
+        <mesh
+          key={x}
+          position={[x, 2.35, 0.08]}
+          rotation={[Math.PI / 2, 0, 0]}
+        >
+          <cylinderGeometry args={[0.015, 0.015, 0.18, 12]} />
           <meshStandardMaterial color="#777" />
         </mesh>
       ))}
 
+      {/* top row */}
       {[0, 1, 2, 3].map((i) => (
         <ProductCard
           key={i}
           productId={products[i]}
           productCatalog={productCatalog}
-          x={-0.72 + i * 0.48}
-          y={1.35}
-          z={0.35}
-          scale={0.62}
+          x={-0.9 + i * 0.6}
+          y={2.0}
+          z={0.28}
+          scale={0.72}
         />
       ))}
     </group>
@@ -1654,6 +1664,71 @@ const startingFixtures = [
     rotation: Math.PI / 2,
     products: [],
   },
+  {
+  id: "Wall Rail 1",
+  type: "wallRail",
+  x: 0.0,
+  z: -7.2,
+  rotation: 0,
+  products: [
+    "harvardArcTeeCrimson",
+    "harvardArcTeeOxford",
+    "harvardArcTeeBlack",
+    "harvardArcTeeWhite",
+  ],
+},
+{
+  id: "Wall Rail 2",
+  type: "wallRail",
+  x: 2.8,
+  z: -7.2,
+  rotation: 0,
+  products: [
+    "crestTeeOxford",
+    "crestTeeNavy",
+    "crestTeeWhite",
+    "benchmarkCrewNavy",
+  ],
+},
+{
+  id: "Wall Rail 3",
+  type: "wallRail",
+  x: 5.6,
+  z: -6.3,
+  rotation: -0.62,
+  products: [
+    "crestHoodCrimson",
+    "crestHoodNavy",
+    "proWeaveHoodCrimson",
+    "proWeaveHoodOatmeal",
+  ],
+},
+{
+  id: "Wall Rail 4",
+  type: "wallRail",
+  x: 7.0,
+  z: -4.2,
+  rotation: -0.62,
+  products: [
+    "benchmarkCrewOxford",
+    "proWeaveCrewBlack",
+    "proWeaveCrewOxford",
+    "harvardArcCrewneckCrimson",
+  ],
+},
+{
+  id: "Wall Rail 5",
+  type: "wallRail",
+  x: 8.0,
+  z: -2.0,
+  rotation: -0.62,
+  products: [
+    "harvardHoodedArcSweatshirtCrimson",
+    "harvardHoodedArcSweatshirtOxford",
+    "theHSweaterCrimson",
+    "theHSweaterCream",
+  ],
+},
   {
     id: "Family Tee Rack",
     type: "threeWay",
