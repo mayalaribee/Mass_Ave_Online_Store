@@ -1534,8 +1534,7 @@ function WallApparelRail({
 }) {
   const selected = selectedId === fixture.id;
   const products = fixture.products || [];
-  const topRow = products.slice(0, 4);
-  const bottomRow = products.slice(0, 4);
+  const displayProducts = products.length ? products : makeEmptyProducts("wallRail");
 
   return (
     <group
@@ -1546,63 +1545,65 @@ function WallApparelRail({
         setSelectedId(fixture.id);
       }}
     >
-      {selected && (
-        <mesh position={[0, 2.05, 0.03]}>
-          <boxGeometry args={[2.65, 1.45, 0.04]} />
-          <meshStandardMaterial color="#2563eb" transparent opacity={0.25} />
-        </mesh>
-      )}
+      {/* this back plate sits directly on the wall */}
+      <mesh position={[0, 2.05, 0.015]}>
+        <boxGeometry args={[2.55, 1.55, 0.035]} />
+        <meshStandardMaterial
+          color={selected ? "#2563eb" : "#b98a58"}
+          transparent
+          opacity={selected ? 0.35 : 0.22}
+        />
+      </mesh>
 
-      {/* upper metal support rail */}
-      <mesh position={[0, 2.55, 0.14]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.03, 0.03, 2.45, 16]} />
+      {/* upper rail */}
+      <mesh position={[0, 2.52, 0.09]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.028, 0.028, 2.35, 16]} />
+        <meshStandardMaterial color="#555" />
+      </mesh>
+
+      {/* lower rail */}
+      <mesh position={[0, 1.88, 0.09]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.026, 0.026, 2.35, 16]} />
         <meshStandardMaterial color="#666" />
       </mesh>
 
-      {/* lower metal support rail */}
-      <mesh position={[0, 1.95, 0.14]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.025, 0.025, 2.45, 16]} />
-        <meshStandardMaterial color="#777" />
-      </mesh>
-
-      {/* wall brackets */}
-      {[-0.95, -0.3, 0.35, 0.95].map((x) => (
+      {/* brackets into the wall */}
+      {[-0.9, -0.3, 0.3, 0.9].map((x) => (
         <React.Fragment key={x}>
-          <mesh position={[x, 2.55, 0.08]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.015, 0.015, 0.2, 12]} />
-            <meshStandardMaterial color="#777" />
+          <mesh position={[x, 2.52, 0.045]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.014, 0.014, 0.22, 12]} />
+            <meshStandardMaterial color="#666" />
           </mesh>
-
-          <mesh position={[x, 1.95, 0.08]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.015, 0.015, 0.2, 12]} />
-            <meshStandardMaterial color="#777" />
+          <mesh position={[x, 1.88, 0.045]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.014, 0.014, 0.22, 12]} />
+            <meshStandardMaterial color="#666" />
           </mesh>
         </React.Fragment>
       ))}
 
       {/* upper row */}
-      {topRow.map((productId, i) => (
+      {[0, 1, 2, 3].map((i) => (
         <ProductCard
-          key={`top-${i}`}
-          productId={productId}
+          key={`upper-${i}`}
+          productId={displayProducts[i]}
           productCatalog={productCatalog}
           x={-0.9 + i * 0.6}
-          y={2.28}
-          z={0.3}
-          scale={0.72}
+          y={2.22}
+          z={0.22}
+          scale={0.68}
         />
       ))}
 
-      {/* lower row moved up to align with the wall display */}
-      {bottomRow.map((productId, i) => (
+      {/* lower row, kept high on the same wall display */}
+      {[0, 1, 2, 3].map((i) => (
         <ProductCard
-          key={`bottom-${i}`}
-          productId={productId}
+          key={`lower-${i}`}
+          productId={displayProducts[i]}
           productCatalog={productCatalog}
           x={-0.9 + i * 0.6}
-          y={1.68}
-          z={0.3}
-          scale={0.72}
+          y={1.58}
+          z={0.22}
+          scale={0.68}
         />
       ))}
     </group>
@@ -1691,73 +1692,72 @@ const startingFixtures = [
     z: 0.2,
     rotation: Math.PI / 2,
     products: [],
+  },  {
+    id: "Wall Rail 1",
+    type: "wallRail",
+    x: -2.4,
+    z: -7.47,
+    rotation: 0,
+    products: [
+      "harvardArcTeeCrimson",
+      "harvardArcTeeOxford",
+      "harvardArcTeeBlack",
+      "harvardArcTeeWhite",
+    ],
   },
   {
-  id: "Wall Rail 1",
-  type: "wallRail",
-  x: 0.0,
-  z: -7.2,
-  rotation: 0,
-  products: [
-    "harvardArcTeeCrimson",
-    "harvardArcTeeOxford",
-    "harvardArcTeeBlack",
-    "harvardArcTeeWhite",
-  ],
-},
-{
-  id: "Wall Rail 2",
-  type: "wallRail",
-  x: 2.8,
-  z: -7.2,
-  rotation: 0,
-  products: [
-    "crestTeeOxford",
-    "crestTeeNavy",
-    "crestTeeWhite",
-    "benchmarkCrewNavy",
-  ],
-},
-{
-  id: "Wall Rail 3",
-  type: "wallRail",
-  x: 5.6,
-  z: -6.3,
-  rotation: -0.62,
-  products: [
-    "crestHoodCrimson",
-    "crestHoodNavy",
-    "proWeaveHoodCrimson",
-    "proWeaveHoodOatmeal",
-  ],
-},
-{
-  id: "Wall Rail 4",
-  type: "wallRail",
-  x: 7.0,
-  z: -4.2,
-  rotation: -0.62,
-  products: [
-    "benchmarkCrewOxford",
-    "proWeaveCrewBlack",
-    "proWeaveCrewOxford",
-    "harvardArcCrewneckCrimson",
-  ],
-},
-{
-  id: "Wall Rail 5",
-  type: "wallRail",
-  x: 8.0,
-  z: -2.0,
-  rotation: -0.62,
-  products: [
-    "harvardHoodedArcSweatshirtCrimson",
-    "harvardHoodedArcSweatshirtOxford",
-    "theHSweaterCrimson",
-    "theHSweaterCream",
-  ],
-},
+    id: "Wall Rail 2",
+    type: "wallRail",
+    x: 0.2,
+    z: -7.47,
+    rotation: 0,
+    products: [
+      "crestTeeOxford",
+      "crestTeeNavy",
+      "crestTeeWhite",
+      "benchmarkCrewNavy",
+    ],
+  },
   {
+    id: "Wall Rail 3",
+    type: "wallRail",
+    x: 2.8,
+    z: -6.25,
+    rotation: -0.77,
+    products: [
+      "crestHoodCrimson",
+      "crestHoodNavy",
+      "proWeaveHoodCrimson",
+      "proWeaveHoodOatmeal",
+    ],
+  },
+  {
+    id: "Wall Rail 4",
+    type: "wallRail",
+    x: 4.7,
+    z: -4.45,
+    rotation: -0.77,
+    products: [
+      "benchmarkCrewOxford",
+      "proWeaveCrewBlack",
+      "proWeaveCrewOxford",
+      "harvardArcCrewneckCrimson",
+    ],
+  },
+  {
+    id: "Wall Rail 5",
+    type: "wallRail",
+    x: 6.45,
+    z: -2.75,
+    rotation: -0.77,
+    products: [
+      "harvardHoodedArcSweatshirtCrimson",
+      "harvardHoodedArcSweatshirtOxford",
+      "theHSweaterCrimson",
+      "theHSweaterCream",
+    ],
+  },
+{
     id: "Family Tee Rack",
     type: "threeWay",
     x: -6.2,
@@ -1921,13 +1921,7 @@ const floorSizesByStore = {
 };
 
 const wallHooksByStore = {
-  massAve: [
-    { x: -7.2, z: -7.25, rotation: 0, product: "harvardArcTeeCrimson" },
-    { x: -5.7, z: -7.25, rotation: 0, product: "harvardArcTeeOxford" },
-    { x: -4.3, z: -7.25, rotation: 0, product: "harvardArcTeeBlack" },
-    { x: -3.0, z: -7.25, rotation: 0, product: "harvardArcTeeWhite" },
-    { x: -1.7, z: -7.25, rotation: 0, product: "crestTeeOxford" },
-  ],
+  massAve: [],
   mtAuburn: [],
   jfk: [],
 };
@@ -2088,7 +2082,7 @@ function canWalkTo(x, z, walls, fixtures, floorSize) {
 export default function App() {
   const [activeStoreId, setActiveStoreId] = useState("massAve");
   const [fixtures, setFixtures] = useState(() => getDefaultFixturesForStore("massAve"));
-  const [selectedId, setSelectedId] = useState("Rack 1");
+  const [selectedId, setSelectedId] = useState("Checkout Desk");
   const [customProducts, setCustomProducts] = useState({});
   const [newRackType, setNewRackType] = useState("fourWay");
   const [newProductName, setNewProductName] = useState("");
