@@ -1071,6 +1071,7 @@ const rackTypes = {
   table: { label: "Display Table", slots: 4 },
   wallHook: { label: "Wall Hook Rack", slots: 2 },
   wallRail: { label: "Wall Apparel Rail", slots: 8 },
+  hatWall: { label: "Hat Wall Rack", slots: 14 },
   twoWay: { label: "Two-Way Rack", slots: 2 },
   desk: { label: "POS Desk", slots: 3 },
 };
@@ -1522,6 +1523,120 @@ function WallHookRack({
         z={0.65}
         scale={0.75}
       />
+    </group>
+  );
+}
+
+
+function HatStack({ x, y, z, productId, productCatalog, color = "#7f1d1d", count = 5 }) {
+  return (
+    <group position={[x, y, z]}>
+      {Array.from({ length: count }).map((_, i) => (
+        <group key={i} position={[0, 0, -i * 0.045]}>
+          <mesh position={[0, 0.05, 0]}>
+            <sphereGeometry args={[0.17, 18, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
+            <meshStandardMaterial color={i === 0 ? color : "#d8d8d8"} />
+          </mesh>
+          <mesh position={[0, -0.055, 0.13]}>
+            <boxGeometry args={[0.34, 0.04, 0.18]} />
+            <meshStandardMaterial color={i === 0 ? color : "#cfcfcf"} />
+          </mesh>
+        </group>
+      ))}
+
+      <ProductCard
+        productId={productId}
+        productCatalog={productCatalog}
+        x={0}
+        y={-0.33}
+        z={0.23}
+        scale={0.28}
+      />
+    </group>
+  );
+}
+
+function HatWallRack({
+  fixture,
+  selectedId,
+  setSelectedId,
+  productCatalog,
+}) {
+  const selected = selectedId === fixture.id;
+  const products = fixture.products || [];
+
+  const pegLayout = [
+    [-1.15, 2.48, "#111111", 5],
+    [-0.65, 2.48, "#1f2937", 5],
+    [-0.15, 2.48, "#111827", 4],
+    [0.35, 2.48, "#f4f1ea", 5],
+    [0.85, 2.48, "#f8fafc", 5],
+    [1.35, 2.48, "#334155", 5],
+
+    [-1.15, 1.92, "#991b1b", 6],
+    [-0.65, 1.92, "#b45309", 5],
+    [-0.15, 1.92, "#111111", 4],
+    [0.35, 1.92, "#1e293b", 4],
+    [0.85, 1.92, "#f8fafc", 5],
+
+    [-1.15, 1.36, "#7f1d1d", 6],
+    [0.10, 1.36, "#374151", 4],
+    [1.10, 1.36, "#4b5563", 5],
+  ];
+
+  return (
+    <group
+      position={[fixture.x, 0, fixture.z]}
+      rotation={[0, fixture.rotation, 0]}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedId(fixture.id);
+      }}
+    >
+      {selected && (
+        <mesh position={[0, 1.92, 0.02]}>
+          <boxGeometry args={[3.15, 1.75, 0.04]} />
+          <meshStandardMaterial color="#2563eb" transparent opacity={0.22} />
+        </mesh>
+      )}
+
+      {[-1.45, -0.48, 0.48, 1.45].map((x) => (
+        <mesh key={x} position={[x, 1.9, 0.055]}>
+          <boxGeometry args={[0.045, 1.95, 0.045]} />
+          <meshStandardMaterial color="#222" />
+        </mesh>
+      ))}
+
+      {[2.62, 2.34, 2.06, 1.78, 1.5, 1.22].map((y) => (
+        <mesh key={y} position={[0, y, 0.06]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.012, 0.012, 3.1, 12]} />
+          <meshStandardMaterial color="#777" />
+        </mesh>
+      ))}
+
+      {pegLayout.map(([x, y, color, count], i) => (
+        <React.Fragment key={i}>
+          <mesh position={[x, y, 0.17]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.018, 0.018, 0.55, 12]} />
+            <meshStandardMaterial color="#333" />
+          </mesh>
+
+          <mesh position={[x, y, 0.43]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.025, 0.025, 0.08, 12]} />
+            <meshStandardMaterial color="#222" />
+          </mesh>
+
+          <HatStack
+            x={x}
+            y={y - 0.05}
+            z={0.46}
+            productId={products[i]}
+            productCatalog={productCatalog}
+            color={color}
+            count={count}
+          />
+        </React.Fragment>
+      ))}
     </group>
   );
 }
@@ -2045,6 +2160,7 @@ const fixtureCollisionRadii = {
   table: 1.65,
   wallHook: 0.95,
   wallRail: 1.35,
+  hatWall: 1.45,
   twoWay: 1.25,
   desk: 2.45,
 };
@@ -2773,6 +2889,18 @@ export default function App() {
           if (fixture.type === "wallHook") {
             return (
               <WallHookRack
+                key={fixture.id}
+                fixture={fixture}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+                productCatalog={productCatalog}
+              />
+            );
+          }
+
+          if (fixture.type === "hatWall") {
+            return (
+              <HatWallRack
                 key={fixture.id}
                 fixture={fixture}
                 selectedId={selectedId}
