@@ -1071,7 +1071,7 @@ const rackTypes = {
   table: { label: "Display Table", slots: 4 },
   wallHook: { label: "Wall Hook Rack", slots: 2 },
   wallRail: { label: "Wall Apparel Rail", slots: 8 },
-  hatWall: { label: "Hat Wall Rack", slots: 14 },
+  hatWall: { label: "Hat Wall Rack", slots: 18 },
   twoWay: { label: "Two-Way Rack", slots: 2 },
   desk: { label: "POS Desk", slots: 3 },
 };
@@ -1566,23 +1566,10 @@ function HatWallRack({
   const products = fixture.products || [];
 
   const pegLayout = [
-    [-1.15, 2.48, "#111111", 5],
-    [-0.65, 2.48, "#1f2937", 5],
-    [-0.15, 2.48, "#111827", 4],
-    [0.35, 2.48, "#f4f1ea", 5],
-    [0.85, 2.48, "#f8fafc", 5],
-    [1.35, 2.48, "#334155", 5],
-
-    [-1.15, 1.92, "#991b1b", 6],
-    [-0.65, 1.92, "#b45309", 5],
-    [-0.15, 1.92, "#111111", 4],
-    [0.35, 1.92, "#1e293b", 4],
-    [0.85, 1.92, "#f8fafc", 5],
-
-    [-1.15, 1.36, "#7f1d1d", 6],
-    [0.10, 1.36, "#374151", 4],
-    [1.10, 1.36, "#4b5563", 5],
-  ];
+  [-1.5, 2.45], [-0.9, 2.45], [-0.3, 2.45], [0.3, 2.45], [0.9, 2.45], [1.5, 2.45],
+  [-1.5, 1.9],  [-0.9, 1.9],  [-0.3, 1.9],  [0.3, 1.9],  [0.9, 1.9],  [1.5, 1.9],
+  [-1.5, 1.35], [-0.9, 1.35], [-0.3, 1.35], [0.3, 1.35], [0.9, 1.35], [1.5, 1.35],
+];
 
   return (
     <group
