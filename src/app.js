@@ -1084,6 +1084,221 @@ function makeEmptyProducts(type) {
   return Array(getSlotCount(type)).fill(null);
 }
 
+
+function getProductVisualType(product) {
+  const name = (product?.name || "").toLowerCase();
+
+  if (name.includes("hat") || name.includes("cap") || name.includes("beanie")) return "hat";
+
+  if (
+    name.includes("mug") ||
+    name.includes("bottle") ||
+    name.includes("tumbler") ||
+    name.includes("glass") ||
+    name.includes("stein")
+  ) {
+    return "drinkware";
+  }
+
+  if (
+    name.includes("hood") ||
+    name.includes("sweatshirt") ||
+    name.includes("sweater") ||
+    name.includes("crew") ||
+    name.includes("quarter zip") ||
+    name.includes("pullover") ||
+    name.includes("jacket") ||
+    name.includes("fleece")
+  ) {
+    return "hoodie";
+  }
+
+  if (
+    name.includes("tee") ||
+    name.includes("t-shirt") ||
+    name.includes("shirt") ||
+    name.includes("polo") ||
+    name.includes("onesie") ||
+    name.includes("rugby")
+  ) {
+    return "shirt";
+  }
+
+  if (name.includes("pin") || name.includes("keychain") || name.includes("sticker") || name.includes("magnet")) {
+    return "small";
+  }
+
+  return "card";
+}
+
+function getProductColor(product) {
+  const name = (product?.name || "").toLowerCase();
+
+  if (name.includes("crimson") || name.includes("red") || name.includes("garnet") || name.includes("maroon")) return "#8c1d40";
+  if (name.includes("navy")) return "#1f2a44";
+  if (name.includes("black")) return "#171717";
+  if (name.includes("white") || name.includes("cream") || name.includes("ivory") || name.includes("oatmeal")) return "#f4efe6";
+  if (name.includes("oxford") || name.includes("gray") || name.includes("grey")) return "#b8bcc2";
+  if (name.includes("green")) return "#315c45";
+  if (name.includes("pink") || name.includes("rose")) return "#d9a1b4";
+
+  return "#8c1d40";
+}
+
+function HangingShirt({ product, texture }) {
+  const color = getProductColor(product);
+
+  return (
+    <group>
+      <mesh position={[0, 0.38, -0.01]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.012, 0.012, 0.48, 12]} />
+        <meshStandardMaterial color="#d1d5db" metalness={0.2} roughness={0.45} />
+      </mesh>
+
+      <mesh position={[0, -0.02, 0]}>
+        <boxGeometry args={[0.46, 0.58, 0.055]} />
+        <meshStandardMaterial color={color} roughness={0.72} />
+      </mesh>
+
+      <mesh position={[-0.32, 0.12, 0]} rotation={[0, 0, -0.25]}>
+        <boxGeometry args={[0.18, 0.28, 0.05]} />
+        <meshStandardMaterial color={color} roughness={0.72} />
+      </mesh>
+
+      <mesh position={[0.32, 0.12, 0]} rotation={[0, 0, 0.25]}>
+        <boxGeometry args={[0.18, 0.28, 0.05]} />
+        <meshStandardMaterial color={color} roughness={0.72} />
+      </mesh>
+
+      <mesh position={[0, 0.02, 0.035]}>
+        <planeGeometry args={[0.28, 0.28]} />
+        <meshStandardMaterial map={texture} roughness={0.6} />
+      </mesh>
+    </group>
+  );
+}
+
+function HangingHoodie({ product, texture }) {
+  const color = getProductColor(product);
+
+  return (
+    <group>
+      <mesh position={[0, 0.42, -0.01]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.012, 0.012, 0.5, 12]} />
+        <meshStandardMaterial color="#d1d5db" metalness={0.2} roughness={0.45} />
+      </mesh>
+
+      <mesh position={[0, 0.33, 0]}>
+        <sphereGeometry args={[0.2, 18, 10]} />
+        <meshStandardMaterial color={color} roughness={0.75} />
+      </mesh>
+
+      <mesh position={[0, -0.04, 0]}>
+        <boxGeometry args={[0.5, 0.62, 0.07]} />
+        <meshStandardMaterial color={color} roughness={0.75} />
+      </mesh>
+
+      <mesh position={[-0.34, 0.02, 0]} rotation={[0, 0, -0.12]}>
+        <boxGeometry args={[0.18, 0.52, 0.06]} />
+        <meshStandardMaterial color={color} roughness={0.75} />
+      </mesh>
+
+      <mesh position={[0.34, 0.02, 0]} rotation={[0, 0, 0.12]}>
+        <boxGeometry args={[0.18, 0.52, 0.06]} />
+        <meshStandardMaterial color={color} roughness={0.75} />
+      </mesh>
+
+      <mesh position={[0, -0.18, 0.045]}>
+        <boxGeometry args={[0.26, 0.12, 0.025]} />
+        <meshStandardMaterial color="#ffffff" transparent opacity={0.16} />
+      </mesh>
+
+      <mesh position={[0, 0.05, 0.05]}>
+        <planeGeometry args={[0.28, 0.28]} />
+        <meshStandardMaterial map={texture} roughness={0.6} />
+      </mesh>
+    </group>
+  );
+}
+
+function ProductHat({ product, texture }) {
+  const color = getProductColor(product);
+
+  return (
+    <group>
+      <mesh position={[0, 0.03, 0]}>
+        <sphereGeometry args={[0.24, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial color={color} roughness={0.78} />
+      </mesh>
+
+      <mesh position={[0, -0.08, 0.18]}>
+        <boxGeometry args={[0.42, 0.045, 0.18]} />
+        <meshStandardMaterial color={color} roughness={0.78} />
+      </mesh>
+
+      <mesh position={[0, 0.02, 0.205]}>
+        <planeGeometry args={[0.22, 0.16]} />
+        <meshStandardMaterial map={texture} roughness={0.6} />
+      </mesh>
+    </group>
+  );
+}
+
+function ProductDrinkware({ product, texture }) {
+  const color = getProductColor(product);
+
+  return (
+    <group>
+      <mesh>
+        <cylinderGeometry args={[0.16, 0.14, 0.55, 24]} />
+        <meshStandardMaterial color={color} roughness={0.55} metalness={0.05} />
+      </mesh>
+
+      <mesh position={[0, 0.01, 0.165]}>
+        <planeGeometry args={[0.18, 0.22]} />
+        <meshStandardMaterial map={texture} roughness={0.6} />
+      </mesh>
+    </group>
+  );
+}
+
+function SmallProduct({ texture }) {
+  return (
+    <group>
+      <mesh>
+        <boxGeometry args={[0.34, 0.34, 0.045]} />
+        <meshStandardMaterial map={texture} roughness={0.58} />
+      </mesh>
+      <mesh position={[0, 0, -0.035]}>
+        <boxGeometry args={[0.39, 0.39, 0.025]} />
+        <meshStandardMaterial color="#f8fafc" roughness={0.65} />
+      </mesh>
+    </group>
+  );
+}
+
+function FoldedStack({ productId, productCatalog, x, y, z, scale = 1 }) {
+  if (!productId) return null;
+
+  const product = productCatalog?.[productId];
+  const color = getProductColor(product);
+
+  return (
+    <group position={[x, y, z]} scale={scale}>
+      {[0, 1, 2].map((i) => (
+        <mesh key={i} position={[0, i * 0.055, 0]}>
+          <boxGeometry args={[0.48, 0.05, 0.38]} />
+          <meshStandardMaterial color={i === 2 ? color : "#d8d8d8"} roughness={0.75} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.19, 0.01]}>
+        <boxGeometry args={[0.26, 0.025, 0.18]} />
+        <meshStandardMaterial color="#ffffff" transparent opacity={0.22} />
+      </mesh>
+    </group>
+  );
+}
+
 function ProductCard({
   productId,
   productCatalog,
@@ -1098,21 +1313,28 @@ function ProductCard({
   const product = productCatalog?.[productId];
   const fallbackImage = catalog.harvardArcTeeCrimson.image;
   const texture = useLoader(TextureLoader, product?.image || fallbackImage);
+  const visualType = getProductVisualType(product);
 
   return (
     <group position={[x, y, z]} scale={scale} rotation={rotation}>
-      <mesh position={[0, 0, -0.012]}>
-        <boxGeometry args={[0.56, 0.72, 0.025]} />
-        <meshStandardMaterial color="#f8fafc" roughness={0.65} />
-      </mesh>
-      <mesh>
-        <boxGeometry args={[0.5, 0.65, 0.04]} />
-        <meshStandardMaterial map={texture} roughness={0.55} />
-      </mesh>
-      <mesh position={[0, 0.39, 0.015]}>
-        <boxGeometry args={[0.14, 0.05, 0.03]} />
-        <meshStandardMaterial color="#d1d5db" />
-      </mesh>
+      {visualType === "shirt" && <HangingShirt product={product} texture={texture} />}
+      {visualType === "hoodie" && <HangingHoodie product={product} texture={texture} />}
+      {visualType === "hat" && <ProductHat product={product} texture={texture} />}
+      {visualType === "drinkware" && <ProductDrinkware product={product} texture={texture} />}
+      {visualType === "small" && <SmallProduct texture={texture} />}
+
+      {visualType === "card" && (
+        <>
+          <mesh position={[0, 0, -0.012]}>
+            <boxGeometry args={[0.56, 0.72, 0.025]} />
+            <meshStandardMaterial color="#f8fafc" roughness={0.65} />
+          </mesh>
+          <mesh>
+            <boxGeometry args={[0.5, 0.65, 0.04]} />
+            <meshStandardMaterial map={texture} roughness={0.55} />
+          </mesh>
+        </>
+      )}
     </group>
   );
 }
@@ -1413,16 +1635,16 @@ function DisplayTable({ fixture, selectedId, setSelectedId, productCatalog }) {
         </mesh>
       ))}
 
-      {/* products on top */}
+      {/* folded product stacks on top */}
       {fixture.products.slice(0, 4).map((p, i) => (
-        <ProductCard
+        <FoldedStack
           key={i}
           productId={p}
           productCatalog={productCatalog}
           x={-0.75 + i * 0.5}
-          y={1.22}
+          y={1.02}
           z={0}
-          scale={0.65}
+          scale={0.85}
         />
       ))}
     </group>
