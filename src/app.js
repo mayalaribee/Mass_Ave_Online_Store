@@ -1071,7 +1071,7 @@ const rackTypes = {
   table: { label: "Display Table", slots: 4 },
   wallHook: { label: "Wall Hook Rack", slots: 2 },
   wallRail: { label: "Wall Apparel Rail", slots: 8 },
-  hatWall: { label: "Hat Wall Rack", slots: 18 },
+  hatWall: { label: "Hat Wall Rack", slots: 14 },
   twoWay: { label: "Two-Way Rack", slots: 2 },
   desk: { label: "POS Desk", slots: 3 },
 };
@@ -1101,9 +1101,17 @@ function ProductCard({
 
   return (
     <group position={[x, y, z]} scale={scale} rotation={rotation}>
+      <mesh position={[0, 0, -0.012]}>
+        <boxGeometry args={[0.56, 0.72, 0.025]} />
+        <meshStandardMaterial color="#f8fafc" roughness={0.65} />
+      </mesh>
       <mesh>
         <boxGeometry args={[0.5, 0.65, 0.04]} />
-        <meshStandardMaterial map={texture} />
+        <meshStandardMaterial map={texture} roughness={0.55} />
+      </mesh>
+      <mesh position={[0, 0.39, 0.015]}>
+        <boxGeometry args={[0.14, 0.05, 0.03]} />
+        <meshStandardMaterial color="#d1d5db" />
       </mesh>
     </group>
   );
@@ -1121,7 +1129,7 @@ function WallSegment({ start, end, height = 3.5 }) {
   return (
     <mesh position={[x, height / 2, z]} rotation={[0, rotation, 0]}>
       <boxGeometry args={[length, height, 0.25]} />
-      <meshStandardMaterial color="#f5f5f5" />
+      <meshStandardMaterial color="#f7f3ed" roughness={0.85} />
     </mesh>
   );
 }
@@ -1206,13 +1214,13 @@ function WoodWallSegment({ start, end, height = 3.5 }) {
     <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
       <mesh position={[0, height / 2, 0]}>
         <boxGeometry args={[length, height, 0.25]} />
-        <meshStandardMaterial color="#b98a58" />
+        <meshStandardMaterial color="#c08b54" roughness={0.78} />
       </mesh>
 
       {rows.map((_, i) => (
         <mesh key={i} position={[0, i * 0.22 + 0.1, 0.14]}>
           <boxGeometry args={[length, 0.025, 0.035]} />
-          <meshStandardMaterial color="#7a4a24" />
+          <meshStandardMaterial color="#8a5529" roughness={0.82} />
         </mesh>
       ))}
     </group>
@@ -1566,10 +1574,23 @@ function HatWallRack({
   const products = fixture.products || [];
 
   const pegLayout = [
-  [-1.5, 2.45], [-0.9, 2.45], [-0.3, 2.45], [0.3, 2.45], [0.9, 2.45], [1.5, 2.45],
-  [-1.5, 1.9],  [-0.9, 1.9],  [-0.3, 1.9],  [0.3, 1.9],  [0.9, 1.9],  [1.5, 1.9],
-  [-1.5, 1.35], [-0.9, 1.35], [-0.3, 1.35], [0.3, 1.35], [0.9, 1.35], [1.5, 1.35],
-];
+    [-1.15, 2.48, "#111111", 5],
+    [-0.65, 2.48, "#1f2937", 5],
+    [-0.15, 2.48, "#111827", 4],
+    [0.35, 2.48, "#f4f1ea", 5],
+    [0.85, 2.48, "#f8fafc", 5],
+    [1.35, 2.48, "#334155", 5],
+
+    [-1.15, 1.92, "#991b1b", 6],
+    [-0.65, 1.92, "#b45309", 5],
+    [-0.15, 1.92, "#111111", 4],
+    [0.35, 1.92, "#1e293b", 4],
+    [0.85, 1.92, "#f8fafc", 5],
+
+    [-1.15, 1.36, "#7f1d1d", 6],
+    [0.10, 1.36, "#374151", 4],
+    [1.10, 1.36, "#4b5563", 5],
+  ];
 
   return (
     <group
@@ -2067,11 +2088,27 @@ function getDefaultFixturesForStore(storeId) {
   return cloneFixtures(startingFixturesByStore[storeId] || []);
 }
 function WoodFloor({ size = [22, 20] }) {
+  const [width, depth] = size;
+  const boardCount = Math.floor(width / 0.42);
+
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]}>
-      <planeGeometry args={size} />
-      <meshStandardMaterial color="#a8753b" roughness={0.65} />
-    </mesh>
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={size} />
+        <meshStandardMaterial color="#b77a3c" roughness={0.72} />
+      </mesh>
+
+      {Array.from({ length: boardCount }).map((_, i) => (
+        <mesh
+          key={i}
+          position={[-width / 2 + i * 0.42, 0.006, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
+          <planeGeometry args={[0.018, depth]} />
+          <meshStandardMaterial color={i % 2 === 0 ? "#8a5529" : "#c88b4a"} roughness={0.82} />
+        </mesh>
+      ))}
+    </group>
   );
 }
 function FirstPersonWalkControls({ enabled, startPosition = [0, 1.6, 6], walls = [], fixtures = [], floorSize = [22, 20] }) {
@@ -2199,6 +2236,97 @@ function canWalkTo(x, z, walls, fixtures, floorSize) {
 
   return !hitsFixture;
 }
+
+
+function CeilingTrackLights({ size = [22, 20] }) {
+  const [width, depth] = size;
+  const rows = [-depth * 0.28, 0, depth * 0.28];
+
+  return (
+    <group>
+      {rows.map((z, rowIndex) => (
+        <group key={z}>
+          <mesh position={[0, 3.55, z]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.018, 0.018, width * 0.72, 16]} />
+            <meshStandardMaterial color="#f8fafc" />
+          </mesh>
+
+          {[-width * 0.25, -width * 0.08, width * 0.08, width * 0.25].map((x, i) => (
+            <group key={`${rowIndex}-${i}`} position={[x, 3.38, z]}>
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.055, 0.075, 0.16, 16]} />
+                <meshStandardMaterial color="#f9fafb" />
+              </mesh>
+              <pointLight intensity={0.28} distance={4.2} />
+            </group>
+          ))}
+        </group>
+      ))}
+
+      <mesh position={[0, 3.32, -7.18]}>
+        <boxGeometry args={[16.6, 0.16, 0.16]} />
+        <meshStandardMaterial color="#a51c30" />
+      </mesh>
+    </group>
+  );
+}
+
+function StoreSignage({ activeStoreId }) {
+  if (activeStoreId !== "massAve") return null;
+
+  return (
+    <group>
+      <group position={[-8.62, 2.15, 0.2]} rotation={[0, Math.PI / 2, 0]}>
+        <mesh>
+          <boxGeometry args={[2.6, 0.7, 0.05]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+        <mesh position={[-0.7, 0, 0.04]}>
+          <boxGeometry args={[0.55, 0.42, 0.04]} />
+          <meshStandardMaterial color="#a51c30" />
+        </mesh>
+        <mesh position={[0.35, 0, 0.04]}>
+          <boxGeometry args={[1.05, 0.08, 0.04]} />
+          <meshStandardMaterial color="#a51c30" />
+        </mesh>
+      </group>
+
+      <group position={[7.95, 1.8, 4.7]} rotation={[0, -1.2, 0]}>
+        <mesh>
+          <boxGeometry args={[0.9, 1.35, 0.08]} />
+          <meshStandardMaterial color="#a51c30" />
+        </mesh>
+        <mesh position={[0, 0, 0.06]}>
+          <boxGeometry args={[0.24, 0.95, 0.04]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+        <mesh position={[0, 0, 0.07]}>
+          <boxGeometry args={[0.82, 0.22, 0.04]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+function FixtureDropShadow({ x, z, width = 1.8, depth = 1.2, rotation = 0 }) {
+  return (
+    <mesh position={[x, 0.012, z]} rotation={[-Math.PI / 2, 0, rotation]}>
+      <planeGeometry args={[width, depth]} />
+      <meshStandardMaterial color="#000000" transparent opacity={0.09} />
+    </mesh>
+  );
+}
+
+function StorePolish({ activeStoreId, floorSize }) {
+  return (
+    <group>
+      <CeilingTrackLights size={floorSize} />
+      <StoreSignage activeStoreId={activeStoreId} />
+    </group>
+  );
+}
+
 
 export default function App() {
   const [activeStoreId, setActiveStoreId] = useState("massAve");
@@ -2779,6 +2907,7 @@ export default function App() {
         )}
 
         <WoodFloor size={activeFloorSize} />
+        <StorePolish activeStoreId={activeStoreId} floorSize={activeFloorSize} />
         <WalkableFloor
           size={activeFloorSize}
           onDropIn={(position) => {
@@ -2835,6 +2964,32 @@ export default function App() {
         <DoubleDoor x={-2.15} z={7.5} rotation={0} />
       </>
     )}
+
+        {fixtures.map((fixture) => {
+          const shadowSizes = {
+            fourWay: [1.45, 1.45],
+            horizontal: [3.0, 0.85],
+            threeWay: [2.65, 1.05],
+            twoWay: [1.45, 1.0],
+            table: [2.9, 1.45],
+            desk: [4.2, 1.25],
+            wallRail: [2.5, 0.35],
+            hatWall: [3.1, 0.35],
+            wallHook: [1.0, 0.35],
+          };
+          const [width, depth] = shadowSizes[fixture.type] || [1.2, 1.2];
+
+          return (
+            <FixtureDropShadow
+              key={`${fixture.id}-shadow`}
+              x={fixture.x}
+              z={fixture.z}
+              width={width}
+              depth={depth}
+              rotation={fixture.rotation}
+            />
+          );
+        })}
 
         {fixtures.map((fixture) => {
           if (fixture.type === "fourWay") {
